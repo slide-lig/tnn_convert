@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import fr.liglab.esprit.binarization.neuron.ATanNeuron;
+import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 import fr.liglab.esprit.binarization.transformer.SymBinarizer;
 import fr.liglab.esprit.binarization.transformer.TernarySolution;
 
@@ -40,7 +40,7 @@ public class BinarizeAll {
 
 			@Override
 			public void accept(RealNeuron t) {
-				SymBinarizer transformer = new SymBinarizer(new ATanNeuron(t.weights, t.bias, true));
+				SymBinarizer transformer = new SymBinarizer(new TanHNeuron(t.weights, t.bias, true));
 				for (boolean[] image : images) {
 					transformer.update(image);
 				}

@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 import fr.liglab.esprit.binarization.FilesProcessing;
 import fr.liglab.esprit.binarization.ScoreFunctions;
 import fr.liglab.esprit.binarization.TernaryProbDistrib;
-import fr.liglab.esprit.binarization.neuron.ATanNeuron;
+import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 import fr.liglab.esprit.binarization.neuron.TernaryOutputNeuron;
 
 import java.util.TreeMap;
@@ -183,7 +183,7 @@ public class SymBinarizer implements TernaryNeuronBinarizer {
 		// String outputFile = args[3];
 		final int neuronIndex = 0;
 		TernaryNeuronBinarizer binarizer = new SymBinarizer(
-				new ATanNeuron(FilesProcessing.getWeights(weightsData, neuronIndex),
+				new TanHNeuron(FilesProcessing.getWeights(weightsData, neuronIndex),
 						FilesProcessing.getBias(biasData, neuronIndex), false));
 		for (boolean[] input : FilesProcessing.getTrainingSet(trainingData, Integer.MAX_VALUE)) {
 			binarizer.update(input);

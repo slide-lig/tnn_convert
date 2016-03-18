@@ -2,7 +2,7 @@ package fr.liglab.esprit.binarization;
 
 import java.util.Arrays;
 
-import fr.liglab.esprit.binarization.neuron.ATanNeuron;
+import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 import fr.liglab.esprit.binarization.neuron.TernaryOutputNeuron;
 import fr.liglab.esprit.binarization.neuron.TernaryWeightsNeuron;
 import fr.liglab.esprit.binarization.transformer.TernaryConfusionMatrix;
@@ -56,7 +56,7 @@ public class NeuronComparator {
 		// String outputFile = args[3];
 		double[] weights = FilesProcessing.getWeights(weightsData, 0);
 		double bias = FilesProcessing.getBias(biasData, 0);
-		TernaryOutputNeuron nOrigin = new ATanNeuron(weights, bias, false);
+		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		TernaryOutputNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.035615,
 				-0.035615, 12, -7);
 		NeuronComparator nc = new NeuronComparator(nOrigin, nBinarized, ScoreFunctions.AGREEMENT);
