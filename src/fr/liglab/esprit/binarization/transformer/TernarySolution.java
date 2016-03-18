@@ -26,8 +26,8 @@ public class TernarySolution {
 	@Override
 	public String toString() {
 		return "TernarySolution [th=" + th + ", tl=" + tl + ", twPos=" + twPos + ", twNeg=" + twNeg
-				+ ", twPosIndex=" + twPosIndex + ", twNegIndex=" + twNegIndex + ", confusionMat=" + confusionMat
-				+ ", score=" + score + "]";
+				+ ", twPosIndex=" + twPosIndex + ", twNegIndex=" + twNegIndex + ", confusionMat=\n" + confusionMat
+				+ ",\n score=" + score + "]";
 	}
 
 }

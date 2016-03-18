@@ -56,11 +56,11 @@ public class NeuronComparator {
 		// String outputFile = args[3];
 		double[] weights = FilesProcessing.getWeights(weightsData, 0);
 		double bias = FilesProcessing.getBias(biasData, 0);
-		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
-		TernaryOutputNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.035615,
-				-0.035615, 12, -7);
+		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, true);
+		TernaryOutputNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.034737,
+				-0.03607, 2, 3);
 		NeuronComparator nc = new NeuronComparator(nOrigin, nBinarized, ScoreFunctions.AGREEMENT);
-		for (boolean[] sample : FilesProcessing.getTrainingSet(trainingData, Integer.MAX_VALUE)) {
+		for (boolean[] sample : FilesProcessing.getTrainingSet(trainingData, 40)) {
 			nc.update(sample);
 		}
 		System.out.println(nc.getConfMat() + "\nscore=" + nc.getScore());
