@@ -4,9 +4,26 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FilesProcessing {
+
+	public static double getCentileAbsWeight(String file, double sparsityConstraint) throws IOException {
+		List<Double> l = new ArrayList<>();
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		String line;
+
+		while ((line = br.readLine()) != null) {
+			String[] input = line.split(",");
+			for (int i = 0; i < input.length; i++) {
+				l.add(Math.abs(Double.parseDouble(input[i])));
+			}
+		}
+		br.close();
+		Collections.sort(l);
+		return l.get((int) (sparsityConstraint * l.size()));
+	}
 
 	public static List<double[]> getAllWeights(String file, int nbNeurons) throws IOException {
 		List<double[]> allWeights = new ArrayList<>();

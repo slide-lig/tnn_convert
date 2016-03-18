@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import fr.liglab.esprit.binarization.FilesProcessing;
 import fr.liglab.esprit.binarization.ScoreFunctions;
@@ -13,17 +14,16 @@ import fr.liglab.esprit.binarization.TernaryProbDistrib;
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 import fr.liglab.esprit.binarization.neuron.TernaryOutputNeuron;
 
-import java.util.TreeMap;
-
 public class SymBinarizer implements TernaryNeuronBinarizer {
 
 	private final TernaryOutputNeuron realNeuron;
 	private final int[] orderedAbsWeightsIndex;
 	private final List<TreeMap<Integer, TernaryProbDistrib>> binarizationQuality;
 	private int nbQualityCellsFilled = 0;
-	private ScoreFunctions scoreFun = ScoreFunctions.AGREEMENT;
+	private final ScoreFunctions scoreFun;
 
-	public SymBinarizer(final TernaryOutputNeuron neuron) {
+	public SymBinarizer(final TernaryOutputNeuron neuron, ScoreFunctions scoreFun) {
+		this.scoreFun = scoreFun;
 		this.realNeuron = neuron;
 		List<Integer> sortArray = new ArrayList<>(neuron.getWeights().length);
 		for (int i = 0; i < neuron.getWeights().length; i++) {
@@ -184,7 +184,8 @@ public class SymBinarizer implements TernaryNeuronBinarizer {
 		final int neuronIndex = 0;
 		TernaryNeuronBinarizer binarizer = new SymBinarizer(
 				new TanHNeuron(FilesProcessing.getWeights(weightsData, neuronIndex),
-						FilesProcessing.getBias(biasData, neuronIndex), false));
+						FilesProcessing.getBias(biasData, neuronIndex), true),
+				ScoreFunctions.AGREEMENT);
 		for (boolean[] input : FilesProcessing.getTrainingSet(trainingData, Integer.MAX_VALUE)) {
 			binarizer.update(input);
 		}

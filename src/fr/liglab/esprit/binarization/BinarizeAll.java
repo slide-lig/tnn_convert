@@ -8,7 +8,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;
-import fr.liglab.esprit.binarization.transformer.SymBinarizer;
+import fr.liglab.esprit.binarization.transformer.SparsitySymBinarizer;
+import fr.liglab.esprit.binarization.transformer.TernaryNeuronBinarizer;
 import fr.liglab.esprit.binarization.transformer.TernarySolution;
 
 public class BinarizeAll {
@@ -23,6 +24,7 @@ public class BinarizeAll {
 		String weightsData = args[1];
 		String biasData = args[2];
 		String outputFile = args[3];
+		double globalTw = FilesProcessing.getCentileAbsWeight(weightsData, 0.80);
 		List<RealNeuron> lNeurons = new ArrayList<>();
 		List<double[]> allWeights = FilesProcessing.getAllWeights(weightsData, Integer.MAX_VALUE);
 		List<Double> allBias = FilesProcessing.getAllBias(biasData, Integer.MAX_VALUE);
@@ -40,7 +42,8 @@ public class BinarizeAll {
 
 			@Override
 			public void accept(RealNeuron t) {
-				SymBinarizer transformer = new SymBinarizer(new TanHNeuron(t.weights, t.bias, true));
+				TernaryNeuronBinarizer transformer = new SparsitySymBinarizer(new TanHNeuron(t.weights, t.bias, false),
+						globalTw, ScoreFunctions.AGREEMENT);
 				for (boolean[] image : images) {
 					transformer.update(image);
 				}

@@ -21,9 +21,10 @@ public class ASymBinarizer implements TernaryNeuronBinarizer {
 	private final int[] orderedAbsWeightsIndex;
 	private final Map<TwPair, TreeMap<Integer, TernaryProbDistrib>> binarizationQuality;
 	private AtomicInteger nbQualityCellsFilled = new AtomicInteger();
-	private ScoreFunctions scoreFun = ScoreFunctions.AGREEMENT;
+	private final ScoreFunctions scoreFun;
 
-	public ASymBinarizer(final TernaryOutputNeuron neuron) {
+	public ASymBinarizer(final TernaryOutputNeuron neuron, ScoreFunctions scoreFun) {
+		this.scoreFun = scoreFun;
 		this.realNeuron = neuron;
 		List<Integer> sortArray = new ArrayList<>(this.realNeuron.getWeights().length);
 		for (int i = 0; i < this.realNeuron.getWeights().length; i++) {
@@ -192,15 +193,15 @@ public class ASymBinarizer implements TernaryNeuronBinarizer {
 								double score = currentDistrib.getScore(scoreFun);
 								if (currentBestParam == null || score > currentBestScore) {
 									currentBestScore = score;
-									currentBestParam = new TernarySolution(th, tl, t.getKey().twPos < 0
-											? Math.nextDown(realNeuron.getWeights()[orderedAbsWeightsIndex[0]])
-											: realNeuron.getWeights()[orderedAbsWeightsIndex[t.getKey().twPos]],
+									currentBestParam = new TernarySolution(th, tl,
+											t.getKey().twPos < 0
+													? Math.nextDown(realNeuron.getWeights()[orderedAbsWeightsIndex[0]])
+													: realNeuron.getWeights()[orderedAbsWeightsIndex[t.getKey().twPos]],
 											t.getKey().twNeg == realNeuron.getWeights().length
-													? Math.nextUp(realNeuron
-															.getWeights()[orderedAbsWeightsIndex[realNeuron
+													? Math.nextUp(
+															realNeuron.getWeights()[orderedAbsWeightsIndex[realNeuron
 																	.getWeights().length - 1]])
-													: realNeuron
-															.getWeights()[orderedAbsWeightsIndex[t.getKey().twNeg]],
+													: realNeuron.getWeights()[orderedAbsWeightsIndex[t.getKey().twNeg]],
 											t.getKey().twPos, t.getKey().twNeg,
 											new TernaryConfusionMatrix(currentDistrib), score);
 								}
