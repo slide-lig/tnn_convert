@@ -1,6 +1,7 @@
 package fr.liglab.esprit.binarization.transformer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -20,10 +21,8 @@ public class SymBinarizer implements TernaryNeuronBinarizer {
 	private final int[] orderedAbsWeightsIndex;
 	private final List<TreeMap<Integer, TernaryProbDistrib>> binarizationQuality;
 	private int nbQualityCellsFilled = 0;
-	private final ScoreFunctions scoreFun;
 
-	public SymBinarizer(final TernaryOutputNeuron neuron, ScoreFunctions scoreFun) {
-		this.scoreFun = scoreFun;
+	public SymBinarizer(final TernaryOutputNeuron neuron) {
 		this.realNeuron = neuron;
 		List<Integer> sortArray = new ArrayList<>(neuron.getWeights().length);
 		for (int i = 0; i < neuron.getWeights().length; i++) {
@@ -82,11 +81,12 @@ public class SymBinarizer implements TernaryNeuronBinarizer {
 		dist.merge(outputProbs);
 	}
 
-	public TernarySolution findBestBinarizedConfiguration() {
+	public TernarySolution[] findBestBinarizedConfiguration(ScoreFunctions[] scoreFuns) {
 		// weightBinarizationIndex is exclusive, so weightBinarizationIndex = 0
 		// means nothing is binary
-		double currentBestScore = Double.NEGATIVE_INFINITY;
-		TernarySolution currentBestParam = null;
+		double[] currentBestScores = new double[scoreFuns.length];
+		Arrays.fill(currentBestScores, Double.NEGATIVE_INFINITY);
+		TernarySolution[] currentBestParams = new TernarySolution[scoreFuns.length];
 		for (int weightBinarizationIndex = 0; weightBinarizationIndex < this.binarizationQuality
 				.size(); weightBinarizationIndex++) {
 			TreeMap<Integer, TernaryProbDistrib> map = this.binarizationQuality.get(weightBinarizationIndex);
@@ -132,18 +132,21 @@ public class SymBinarizer implements TernaryNeuronBinarizer {
 						tl = tlEntry.getKey();
 					}
 					// System.out.println(th + " " + tl);
-					double score = currentDistrib.getScore(scoreFun);
-					if (currentBestParam == null || score > currentBestScore) {
-						currentBestScore = score;
-						currentBestParam = new TernarySolution(th, tl,
-								weightBinarizationIndex == this.orderedAbsWeightsIndex.length ? 1000000.
-										: Math.abs(this.realNeuron
-												.getWeights()[this.orderedAbsWeightsIndex[weightBinarizationIndex]]),
-								weightBinarizationIndex == this.orderedAbsWeightsIndex.length ? -1000000.
-										: -Math.abs(this.realNeuron
-												.getWeights()[this.orderedAbsWeightsIndex[weightBinarizationIndex]]),
-								weightBinarizationIndex, weightBinarizationIndex,
-								new TernaryConfusionMatrix(currentDistrib), score);
+					for (int i = 0; i < scoreFuns.length; i++) {
+						ScoreFunctions scoreFun = scoreFuns[i];
+						double score = currentDistrib.getScore(scoreFun);
+						if (currentBestParams[i] == null || score > currentBestScores[i]) {
+							currentBestScores[i] = score;
+							currentBestParams[i] = new TernarySolution(th, tl,
+									weightBinarizationIndex == this.orderedAbsWeightsIndex.length ? 1000000.
+											: Math.abs(this.realNeuron
+													.getWeights()[this.orderedAbsWeightsIndex[weightBinarizationIndex]]),
+									weightBinarizationIndex == this.orderedAbsWeightsIndex.length ? -1000000.
+											: -Math.abs(this.realNeuron
+													.getWeights()[this.orderedAbsWeightsIndex[weightBinarizationIndex]]),
+									weightBinarizationIndex, weightBinarizationIndex,
+									new TernaryConfusionMatrix(currentDistrib), score);
+						}
 					}
 					// update currentDistrib
 					// when th doesn'change but tl goes up some 0 answers
@@ -173,7 +176,7 @@ public class SymBinarizer implements TernaryNeuronBinarizer {
 				firstThIter = false;
 			}
 		}
-		return currentBestParam;
+		return currentBestParams;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -184,12 +187,11 @@ public class SymBinarizer implements TernaryNeuronBinarizer {
 		final int neuronIndex = 0;
 		TernaryNeuronBinarizer binarizer = new SymBinarizer(
 				new TanHNeuron(FilesProcessing.getWeights(weightsData, neuronIndex),
-						FilesProcessing.getBias(biasData, neuronIndex), true),
-				ScoreFunctions.AGREEMENT);
-		for (boolean[] input : FilesProcessing.getTrainingSet(trainingData, Integer.MAX_VALUE)) {
+						FilesProcessing.getBias(biasData, neuronIndex), true));
+		for (boolean[] input : FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE)) {
 			binarizer.update(input);
 		}
-		System.out.println(binarizer.findBestBinarizedConfiguration());
+		System.out.println(Arrays.toString(binarizer.findBestBinarizedConfiguration(ScoreFunctions.values())));
 	}
 
 }

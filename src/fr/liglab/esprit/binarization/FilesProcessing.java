@@ -78,7 +78,7 @@ public class FilesProcessing {
 
 	public static int getHeadingZeros(String file) throws IOException {
 		int nbZeros = Integer.MAX_VALUE;
-		for (boolean[] input : getTrainingSet(file, Integer.MAX_VALUE)) {
+		for (boolean[] input : getAllTrainingSet(file, Integer.MAX_VALUE)) {
 			int nb = 0;
 			for (int i = 0; i < input.length && nb < nbZeros; i++) {
 				if (!input[i]) {
@@ -94,7 +94,7 @@ public class FilesProcessing {
 
 	public static int getTrailingZeros(String file) throws IOException {
 		int nbZeros = Integer.MAX_VALUE;
-		for (boolean[] input : getTrainingSet(file, Integer.MAX_VALUE)) {
+		for (boolean[] input : getAllTrainingSet(file, Integer.MAX_VALUE)) {
 			int nb = 0;
 			for (int i = input.length - 1; i >= 0 && nb < nbZeros; i--) {
 				if (!input[i]) {
@@ -111,7 +111,7 @@ public class FilesProcessing {
 	public static int getNbAlwaysZero(String file) throws IOException {
 		boolean[] alwaysZero = new boolean[1024];
 		Arrays.fill(alwaysZero, true);
-		for (boolean[] input : getTrainingSet(file, Integer.MAX_VALUE)) {
+		for (boolean[] input : getAllTrainingSet(file, Integer.MAX_VALUE)) {
 			for (int i = 0; i < input.length; i++) {
 				if (alwaysZero[i] && input[i]) {
 					alwaysZero[i] = false;
@@ -130,7 +130,7 @@ public class FilesProcessing {
 	public static boolean[] getAlwaysZero(String file) throws IOException {
 		boolean[] alwaysZero = new boolean[1024];
 		Arrays.fill(alwaysZero, true);
-		for (boolean[] input : getTrainingSet(file, Integer.MAX_VALUE)) {
+		for (boolean[] input : getAllTrainingSet(file, Integer.MAX_VALUE)) {
 			for (int i = 0; i < input.length; i++) {
 				if (alwaysZero[i] && input[i]) {
 					alwaysZero[i] = false;
@@ -142,7 +142,7 @@ public class FilesProcessing {
 
 	public static int[] getDensity(String file) throws IOException {
 		int[] histo = new int[1024];
-		for (boolean[] input : getTrainingSet(file, Integer.MAX_VALUE)) {
+		for (boolean[] input : getAllTrainingSet(file, Integer.MAX_VALUE)) {
 			int nb = 0;
 			for (int i = 0; i < input.length; i++) {
 				if (input[i]) {
@@ -190,6 +190,30 @@ public class FilesProcessing {
 		return allWeights;
 	}
 
+	public static List<double[]> getFilteredWeights(String file, int nbNeurons) throws IOException {
+		List<double[]> allWeights = new ArrayList<>();
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		String line;
+
+		while ((line = br.readLine()) != null) {
+			if (allWeights.size() == nbNeurons) {
+				break;
+			}
+			String[] input = line.split(",");
+			double[] weights = new double[input.length - nbAlwaysZeroPixels];
+			int insertPos = 0;
+			for (int i = 0; i < input.length; i++) {
+				if (!alwaysZeroPixels[i]) {
+					weights[insertPos] = Double.parseDouble(input[i]);
+					insertPos++;
+				}
+			}
+			allWeights.add(weights);
+		}
+		br.close();
+		return allWeights;
+	}
+
 	public static double[] getWeights(String file, int neuronIndex) throws IOException {
 		// load neuron weights
 		BufferedReader br = new BufferedReader(new FileReader(file));
@@ -202,6 +226,31 @@ public class FilesProcessing {
 				weights = new double[input.length];
 				for (int i = 0; i < input.length; i++) {
 					weights[i] = Double.parseDouble(input[i]);
+				}
+				break;
+			}
+			lineNumber++;
+		}
+		br.close();
+		return weights;
+	}
+
+	public static double[] getFilteredWeightsSingle(String file, int neuronIndex) throws IOException {
+		// load neuron weights
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		String line;
+		int lineNumber = 0;
+		double[] weights = null;
+		while ((line = br.readLine()) != null) {
+			if (lineNumber == neuronIndex) {
+				String[] input = line.split(",");
+				weights = new double[input.length - nbAlwaysZeroPixels];
+				int insertPos = 0;
+				for (int i = 0; i < input.length; i++) {
+					if (!alwaysZeroPixels[i]) {
+						weights[insertPos] = Double.parseDouble(input[i]);
+						insertPos++;
+					}
 				}
 				break;
 			}
@@ -242,7 +291,7 @@ public class FilesProcessing {
 		return bias;
 	}
 
-	public static List<boolean[]> getTrainingSet(String file, int nbSamples) throws IOException {
+	public static List<boolean[]> getAllTrainingSet(String file, int nbSamples) throws IOException {
 		List<boolean[]> trainingset = new ArrayList<>();
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		String line;
@@ -259,6 +308,37 @@ public class FilesProcessing {
 						input[i] = true;
 					} else {
 						input[i] = false;
+					}
+				}
+				trainingset.add(input);
+			}
+			nbSamp++;
+		}
+		br.close();
+		return trainingset;
+	}
+
+	public static List<boolean[]> getFilteredTrainingSet(String file, int nbSamples) throws IOException {
+		List<boolean[]> trainingset = new ArrayList<>();
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		String line;
+		int nbSamp = 0;
+		while ((line = br.readLine()) != null) {
+			if (nbSamp == nbSamples) {
+				break;
+			}
+			if (!line.isEmpty()) {
+				String[] data = line.split(",");
+				boolean[] input = new boolean[data.length - nbAlwaysZeroPixels];
+				int insertPos = 0;
+				for (int i = 0; i < data.length; i++) {
+					if (!alwaysZeroPixels[i]) {
+						if (data[i].equals("1")) {
+							input[insertPos] = true;
+						} else {
+							input[insertPos] = false;
+						}
+						insertPos++;
 					}
 				}
 				trainingset.add(input);

@@ -60,7 +60,7 @@ public class NeuronComparator {
 		TernaryOutputNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.034737,
 				-0.03607, 2, 3);
 		NeuronComparator nc = new NeuronComparator(nOrigin, nBinarized, ScoreFunctions.AGREEMENT);
-		for (boolean[] sample : FilesProcessing.getTrainingSet(trainingData, 40)) {
+		for (boolean[] sample : FilesProcessing.getAllTrainingSet(trainingData, 40)) {
 			nc.update(sample);
 		}
 		System.out.println(nc.getConfMat() + "\nscore=" + nc.getScore());

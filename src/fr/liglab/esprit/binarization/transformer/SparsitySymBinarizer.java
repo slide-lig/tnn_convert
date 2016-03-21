@@ -1,5 +1,6 @@
 package fr.liglab.esprit.binarization.transformer;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -16,10 +17,8 @@ public class SparsitySymBinarizer implements TernaryNeuronBinarizer {
 	private final byte[] binarizedWeights;
 	private final double tw;
 	private final TreeMap<Integer, TernaryProbDistrib> binarizationQuality;
-	private final ScoreFunctions scoreFun;
 
-	public SparsitySymBinarizer(final TernaryOutputNeuron neuron, final double tw, ScoreFunctions scoreFun) {
-		this.scoreFun = scoreFun;
+	public SparsitySymBinarizer(final TernaryOutputNeuron neuron, final double tw) {
 		this.realNeuron = neuron;
 		this.binarizedWeights = new byte[neuron.getWeights().length];
 		for (int i = 0; i < neuron.getWeights().length; i++) {
@@ -55,11 +54,12 @@ public class SparsitySymBinarizer implements TernaryNeuronBinarizer {
 		dist.merge(outputProbs);
 	}
 
-	public TernarySolution findBestBinarizedConfiguration() {
+	public TernarySolution[] findBestBinarizedConfiguration(ScoreFunctions[] scoreFuns) {
 		// weightBinarizationIndex is exclusive, so weightBinarizationIndex = 0
 		// means nothing is binary
-		double currentBestScore = Double.NEGATIVE_INFINITY;
-		TernarySolution currentBestParam = null;
+		double[] currentBestScores = new double[scoreFuns.length];
+		Arrays.fill(currentBestScores, Double.NEGATIVE_INFINITY);
+		TernarySolution[] currentBestParams = new TernarySolution[scoreFuns.length];
 		// System.out.println(weightBinarizationIndex + "->" +
 		// map.keySet());
 		// sum>th means we output 1
@@ -103,11 +103,14 @@ public class SparsitySymBinarizer implements TernaryNeuronBinarizer {
 					tl = tlEntry.getKey();
 				}
 				// System.out.println(th + " " + tl);
-				double score = currentDistrib.getScore(scoreFun);
-				if (currentBestParam == null || score > currentBestScore) {
-					currentBestScore = score;
-					currentBestParam = new TernarySolution(th, tl, tw, -tw, Integer.MAX_VALUE, Integer.MAX_VALUE,
-							new TernaryConfusionMatrix(currentDistrib), score);
+				for (int i = 0; i < scoreFuns.length; i++) {
+					ScoreFunctions scoreFun = scoreFuns[i];
+					double score = currentDistrib.getScore(scoreFun);
+					if (currentBestParams[i] == null || score > currentBestScores[i]) {
+						currentBestScores[i] = score;
+						currentBestParams[i] = new TernarySolution(th, tl, tw, -tw, Integer.MAX_VALUE,
+								Integer.MAX_VALUE, new TernaryConfusionMatrix(currentDistrib), score);
+					}
 				}
 				// update currentDistrib
 				// when th doesn'change but tl goes up some 0 answers
@@ -136,7 +139,7 @@ public class SparsitySymBinarizer implements TernaryNeuronBinarizer {
 			}
 			firstThIter = false;
 		}
-		return currentBestParam;
+		return currentBestParams;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -148,11 +151,11 @@ public class SparsitySymBinarizer implements TernaryNeuronBinarizer {
 		TernaryNeuronBinarizer binarizer = new SparsitySymBinarizer(
 				new TanHNeuron(FilesProcessing.getWeights(weightsData, neuronIndex),
 						FilesProcessing.getBias(biasData, neuronIndex), false),
-				FilesProcessing.getCentileAbsWeight(weightsData, 0.80), ScoreFunctions.AGREEMENT);
-		for (boolean[] input : FilesProcessing.getTrainingSet(trainingData, Integer.MAX_VALUE)) {
+				FilesProcessing.getCentileAbsWeight(weightsData, 0.80));
+		for (boolean[] input : FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE)) {
 			binarizer.update(input);
 		}
-		System.out.println(binarizer.findBestBinarizedConfiguration());
+		System.out.println(Arrays.toString(binarizer.findBestBinarizedConfiguration(ScoreFunctions.values())));
 	}
 
 }
