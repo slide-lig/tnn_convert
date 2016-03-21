@@ -1,5 +1,6 @@
 package fr.liglab.esprit.binarization.transformer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +21,12 @@ import fr.liglab.esprit.binarization.TernaryProbDistrib;
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 import fr.liglab.esprit.binarization.neuron.TernaryOutputNeuron;
 
-public class ASymBinarizer implements TernaryNeuronBinarizer {
+public class ASymBinarizer implements TernaryNeuronBinarizer, Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final TernaryOutputNeuron realNeuron;
 	private final int[] orderedAbsWeightsIndex;
 	private final Map<TwPair, TreeMap<Integer, TernaryProbDistrib>> binarizationQuality;
