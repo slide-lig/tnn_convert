@@ -94,47 +94,9 @@ public class BestScoreSearch {
 			ResultPosition lim2Score = this.searchBestDichotomic(breakPoint2Pos, 0,
 					this.scoreSpace[breakPoint2Pos].length);
 			if (lim1Score.s > lim2Score.s) {
-				// System.out.println("lim1 wins");
-				ResultPosition bestPos = lim1Score;
-				if (fromX != breakPoint1Pos) {
-					ResultPosition leftPartScore = searchBestDichotomic(fromX, breakPoint1Pos);
-					// System.out.println("Recursion End X " + fromX + " - " +
-					// breakPoint1Pos + " -> " + leftPartScore);
-					if (leftPartScore.s > bestPos.s) {
-						bestPos = leftPartScore;
-					}
-				}
-				if (breakPoint2Pos - breakPoint1Pos > 1) {
-					ResultPosition rightPartScore = searchBestDichotomic(breakPoint1Pos + 1, breakPoint2Pos);
-					// System.out
-					// .println("Recursion End X " + fromX + " - " +
-					// breakPoint1Pos + 1 + " -> " + breakPoint2Pos);
-					if (rightPartScore.s > bestPos.s) {
-						bestPos = rightPartScore;
-					}
-				}
-				return bestPos;
+				return searchBestDichotomic(fromX, breakPoint2Pos);
 			} else {
-				// System.out.println("lim2 wins");
-				ResultPosition bestPos = lim2Score;
-				if (breakPoint2Pos - breakPoint1Pos > 1) {
-					ResultPosition leftPartScore = searchBestDichotomic(breakPoint1Pos + 1, breakPoint2Pos);
-					// System.out
-					// .println("Recursion End X " + fromX + " - " +
-					// breakPoint1Pos + 1 + " -> " + breakPoint2Pos);
-					if (leftPartScore.s > bestPos.s) {
-						bestPos = leftPartScore;
-					}
-				}
-				if (toX - breakPoint2Pos != 1) {
-					ResultPosition rightPartScore = searchBestDichotomic(breakPoint2Pos + 1, toX);
-					// System.out.println("Recursion End X " + fromX + " - " +
-					// (breakPoint2Pos + 1) + " -> " + toX);
-					if (rightPartScore.s > bestPos.s) {
-						bestPos = rightPartScore;
-					}
-				}
-				return bestPos;
+				return searchBestDichotomic(breakPoint1Pos + 1, toX);
 			}
 		}
 	}
@@ -162,35 +124,9 @@ public class BestScoreSearch {
 			int breakPoint2Pos = breakPoint1Pos + segment2Size + 1;
 			ResultPosition lim2Score = new ResultPosition(x, breakPoint2Pos, this.scoreSpace[x][breakPoint2Pos]);
 			if (lim1Score.s > lim2Score.s) {
-				ResultPosition bestPos = lim1Score;
-				if (fromY != breakPoint1Pos) {
-					ResultPosition leftPartScore = searchBestDichotomic(x, fromY, breakPoint1Pos);
-					if (leftPartScore.s > bestPos.s) {
-						bestPos = leftPartScore;
-					}
-				}
-				if (breakPoint2Pos - breakPoint1Pos > 1) {
-					ResultPosition rightPartScore = searchBestDichotomic(x, breakPoint1Pos + 1, breakPoint2Pos);
-					if (rightPartScore.s > bestPos.s) {
-						bestPos = rightPartScore;
-					}
-				}
-				return bestPos;
+				return searchBestDichotomic(x, fromY, breakPoint2Pos);
 			} else {
-				ResultPosition bestPos = lim2Score;
-				if (breakPoint2Pos - breakPoint1Pos > 1) {
-					ResultPosition leftPartScore = searchBestDichotomic(x, breakPoint1Pos + 1, breakPoint2Pos);
-					if (leftPartScore.s > bestPos.s) {
-						bestPos = leftPartScore;
-					}
-				}
-				if (toY - breakPoint2Pos != 1) {
-					ResultPosition rightPartScore = searchBestDichotomic(x, breakPoint2Pos + 1, toY);
-					if (rightPartScore.s > bestPos.s) {
-						bestPos = rightPartScore;
-					}
-				}
-				return bestPos;
+				return searchBestDichotomic(x, breakPoint1Pos + 1, toY);
 			}
 		}
 	}
@@ -215,7 +151,13 @@ public class BestScoreSearch {
 		// 0.4, 0.46, 0.43, 0.42, 0.34 },
 		// { 0.7, 0.75, 0.9, 0.85, 0.8 }, { 0.47, 0.72, 0.78, 0.83, 0.82 }, {
 		// 0.41, 0.72, 0.67, 0.65, 0.61 } };
-		String file = "/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/binary_agreement_asym_distrib.txt_neuron_0-AGREEMENT";
+//		double[][] mat = new double[10000][10000];
+//		for (int i = 0; i < mat.length; i++) {
+//			for (int j = 0; j < mat[i].length; j++) {
+//				mat[i][j] = Math.random();
+//			}
+//		}
+		String file = "/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/binary_agreement_asym_distrib.txt_neuron_19-AGREEMENT";
 		int maxX = 0;
 		int minX = Integer.MAX_VALUE;
 		int maxY = 0;
@@ -244,22 +186,22 @@ public class BestScoreSearch {
 		br.close();
 		BestScoreSearch bss = new BestScoreSearch(mat);
 		ResultPosition realBest = bss.getActualBest();
-		System.out.println(realBest);
+		System.out.println("real best " + realBest);
 		ResultPosition dichotomicBest = bss.searchBestDichotomic();
-		System.out.println(dichotomicBest);
+		System.out.println("dichotomic " + dichotomicBest);
 		System.out.println(bss.getNbOptionsTested() + " out of " + (mat.length * mat[0].length));
 		// System.out.println(bss.nbXCalls + " - " + bss.nbYCalls);
 		ResultPosition bestAround = bss.searchExhaustiveAround(dichotomicBest.x, dichotomicBest.y,
-				(int) Math.log(mat.length), (int) Math.log(mat[0].length));
-		System.out.println(bestAround);
+				2 * (int) Math.log(mat.length), 2 * (int) Math.log(mat[0].length));
+		System.out.println("dichotomic + around " + bestAround);
 		System.out.println(bss.getNbOptionsTested() + " out of " + (mat.length * mat[0].length));
 		bss.nbOptionsTested = 0;
 		ResultPosition bestGrid = bss.searchGrid((int) Math.sqrt(mat.length), (int) Math.sqrt(mat[0].length));
-		System.out.println(bestGrid);
+		System.out.println("grid " + bestGrid);
 		System.out.println(bss.getNbOptionsTested() + " out of " + (mat.length * mat[0].length));
 		ResultPosition bestAroundGrid = bss.searchExhaustiveAround(bestGrid.x, bestGrid.y,
 				2 * (int) Math.sqrt(mat.length), 2 * (int) Math.sqrt(mat[0].length));
-		System.out.println(bestAroundGrid);
+		System.out.println("grid + around " + bestAroundGrid);
 		System.out.println(bss.getNbOptionsTested() + " out of " + (mat.length * mat[0].length));
 		// System.out.println(Arrays.stream(mat[277]).max().getAsDouble());
 		// System.out.println(Arrays.stream(mat[278]).max().getAsDouble());
