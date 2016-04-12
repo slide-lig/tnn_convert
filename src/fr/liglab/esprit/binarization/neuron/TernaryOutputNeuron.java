@@ -10,4 +10,24 @@ public interface TernaryOutputNeuron {
 	default public double getWeightSign(int index) {
 		return Math.signum(this.getWeights()[index]);
 	}
+
+	default public int getNbPosWeights() {
+		int count = 0;
+		for (double d : this.getWeights()) {
+			if (d > 0.) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	default public int getNbNegWeights() {
+		int count = 0;
+		for (double d : this.getWeights()) {
+			if (d < 0.) {
+				count++;
+			}
+		}
+		return count;
+	}
 }

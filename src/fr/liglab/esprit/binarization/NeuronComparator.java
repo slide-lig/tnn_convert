@@ -59,7 +59,9 @@ public class NeuronComparator {
 		double bias = FilesProcessing.getBias(biasData, 1);
 		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		TernaryOutputNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.012217,
-				-0.013479, 15, -12);
+				-0.013479, 19, -16);
+		System.out.println(
+				nBinarized.getNbPosWeights() + " pos weights, " + nBinarized.getNbNegWeights() + " neg weights");
 		NeuronComparator nc = new NeuronComparator(nOrigin, nBinarized, ScoreFunctions.AGREEMENT);
 		double[][] pixelFreq = null;
 		int nbSamples = 0;

@@ -46,6 +46,20 @@ public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 		}
 	}
 
+	public int getSum(boolean[] input) {
+		int sum = 0;
+		for (int i = 0; i < input.length; i++) {
+			if (input[i]) {
+				if (this.weights[i] > 0.) {
+					sum++;
+				} else if (this.weights[i] < 0.) {
+					sum--;
+				}
+			}
+		}
+		return sum;
+	}
+
 	public TernaryProbDistrib getOutputProbs(boolean[] input) {
 		double[] probs = new double[3];
 		int sum = 0;
