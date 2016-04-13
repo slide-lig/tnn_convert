@@ -22,14 +22,12 @@ public class TanHNeuron implements TernaryOutputNeuron {
 		return this.accumAgreement / this.nbSamplesProcessed;
 	}
 
-	public TernaryProbDistrib getOutputProbs(boolean[] input) {
+	public TernaryProbDistrib getOutputProbs(byte[] input) {
 		this.nbSamplesProcessed++;
 		double[] outArray = new double[3];
 		double sum = bias;
 		for (int i = 0; i < input.length; i++) {
-			if (input[i]) {
-				sum += this.realWeights[i];
-			}
+			sum += this.realWeights[i] * input[i];
 		}
 		double out = Math.tanh(sum);
 		// output index: -1->0 0->1 1->2

@@ -36,7 +36,7 @@ public class BinarizeAll {
 			rl.id = i;
 			lNeurons.add(rl);
 		}
-		List<boolean[]> images = FilesProcessing.getFilteredTrainingSet(trainingData, Integer.MAX_VALUE);
+		List<byte[]> images = FilesProcessing.getFilteredTrainingSet(trainingData, Integer.MAX_VALUE);
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
 		AtomicInteger nbDone = new AtomicInteger();
 		lNeurons.parallelStream().forEach(new Consumer<RealNeuron>() {

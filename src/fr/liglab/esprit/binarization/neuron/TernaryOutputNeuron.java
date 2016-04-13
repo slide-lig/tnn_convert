@@ -3,7 +3,7 @@ package fr.liglab.esprit.binarization.neuron;
 import fr.liglab.esprit.binarization.TernaryProbDistrib;
 
 public interface TernaryOutputNeuron {
-	public TernaryProbDistrib getOutputProbs(boolean[] input);
+	public TernaryProbDistrib getOutputProbs(byte[] input);
 
 	public double[] getWeights();
 

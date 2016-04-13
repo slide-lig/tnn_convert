@@ -5,5 +5,5 @@ import fr.liglab.esprit.binarization.ScoreFunctions;
 public interface TernaryNeuronBinarizer {
 	public TernarySolution[] findBestBinarizedConfiguration(ScoreFunctions[] scoreFuns);
 
-	public void update(boolean[] input);
+	public void update(byte[] input);
 }

@@ -94,32 +94,29 @@ public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 		}
 	}
 
-	public int getSum(boolean[] input) {
+	public int getSum(byte[] input) {
 		int sum = 0;
 		for (int i = 0; i < input.length; i++) {
-			if (input[i]) {
+			if (input[i] == 1) {
 				if (this.weights[i] > 0.) {
 					sum++;
 				} else if (this.weights[i] < 0.) {
 					sum--;
+				}
+			} else if (input[i] == -1) {
+				if (this.weights[i] > 0.) {
+					sum--;
+				} else if (this.weights[i] < 0.) {
+					sum++;
 				}
 			}
 		}
 		return sum;
 	}
 
-	public TernaryProbDistrib getOutputProbs(boolean[] input) {
+	public TernaryProbDistrib getOutputProbs(byte[] input) {
 		double[] probs = new double[3];
-		int sum = 0;
-		for (int i = 0; i < input.length; i++) {
-			if (input[i]) {
-				if (this.weights[i] > 0.) {
-					sum++;
-				} else if (this.weights[i] < 0.) {
-					sum--;
-				}
-			}
-		}
+		int sum = this.getSum(input);
 		if (sum > this.th) {
 			probs[0] = 0.;
 			probs[1] = 0.;

@@ -24,7 +24,7 @@ public class NeuronComparator {
 		this.confMat = new TernaryConfusionMatrix();
 	}
 
-	public void update(boolean[] input) {
+	public void update(byte[] input) {
 		TernaryProbDistrib output1 = n1.getOutputProbs(input);
 		TernaryProbDistrib output2 = n2.getOutputProbs(input);
 		for (int i = 0; i < 3; i++) {
@@ -59,7 +59,7 @@ public class NeuronComparator {
 		// String outputFile = args[3];
 		List<double[]> weights = FilesProcessing.getFilteredWeights(weightsData, Integer.MAX_VALUE);
 		List<Double> bias = FilesProcessing.getAllBias(biasData, Integer.MAX_VALUE);
-		List<boolean[]> samples = FilesProcessing.getFilteredTrainingSet(testingData, Integer.MAX_VALUE);
+		List<byte[]> samples = FilesProcessing.getFilteredTrainingSet(testingData, Integer.MAX_VALUE);
 		// BufferedReader br1 = new BufferedReader(new FileReader(
 		// "/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/binary_agreement_asym.txt"));
 		BufferedReader br2 = new BufferedReader(new FileReader(
@@ -81,7 +81,7 @@ public class NeuronComparator {
 			// NeuronComparator nc1 = new NeuronComparator(nOrigin, nBinarized1,
 			// ScoreFunctions.AGREEMENT);
 			NeuronComparator nc2 = new NeuronComparator(nOrigin, nBinarized2, ScoreFunctions.AGREEMENT);
-			for (boolean[] sample : samples) {
+			for (byte[] sample : samples) {
 				// nc1.update(sample);
 				nc2.update(sample);
 			}
