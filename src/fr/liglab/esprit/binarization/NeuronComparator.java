@@ -1,7 +1,9 @@
 package fr.liglab.esprit.binarization;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.Arrays;
-import java.util.Random;
+import java.util.List;
 
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 import fr.liglab.esprit.binarization.neuron.TernaryOutputNeuron;
@@ -55,55 +57,44 @@ public class NeuronComparator {
 		String weightsData = args[1];
 		String biasData = args[2];
 		// String outputFile = args[3];
-		double[] weights = FilesProcessing.getWeights(weightsData, 1);
-		double bias = FilesProcessing.getBias(biasData, 1);
-		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
-		TernaryOutputNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.012217,
-				-0.013479, 19, -16);
-		System.out.println(
-				nBinarized.getNbPosWeights() + " pos weights, " + nBinarized.getNbNegWeights() + " neg weights");
-		NeuronComparator nc = new NeuronComparator(nOrigin, nBinarized, ScoreFunctions.AGREEMENT);
-		double[][] pixelFreq = null;
-		int nbSamples = 0;
-		for (boolean[] sample : FilesProcessing.getAllTrainingSet(testingData, Integer.MAX_VALUE)) {
-			if (pixelFreq == null) {
-				pixelFreq = new double[sample.length][3];
+		List<double[]> weights = FilesProcessing.getFilteredWeights(weightsData, Integer.MAX_VALUE);
+		List<Double> bias = FilesProcessing.getAllBias(biasData, Integer.MAX_VALUE);
+		List<boolean[]> samples = FilesProcessing.getFilteredTrainingSet(testingData, Integer.MAX_VALUE);
+		// BufferedReader br1 = new BufferedReader(new FileReader(
+		// "/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/binary_agreement_asym.txt"));
+		BufferedReader br2 = new BufferedReader(new FileReader(
+				"/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/binary_agreement_loglog.txt"));
+		for (int i = 0; i < weights.size(); i++) {
+			TanHNeuron nOrigin = new TanHNeuron(weights.get(i), bias.get(i), false);
+			// String s1 = br1.readLine();
+			// String[] sp = s1.split(",");
+			// TernaryOutputNeuron nBinarized1 = new TernaryWeightsNeuron(
+			// Arrays.copyOf(weights.get(i), weights.get(i).length),
+			// Double.parseDouble(sp[0]),
+			// Double.parseDouble(sp[1]), Integer.parseInt(sp[2]),
+			// Integer.parseInt(sp[3]));
+			String s2 = br2.readLine();
+			String[] sp2 = s2.split(",");
+			TernaryOutputNeuron nBinarized2 = new TernaryWeightsNeuron(
+					Arrays.copyOf(weights.get(i), weights.get(i).length), Integer.parseInt(sp2[0]),
+					Integer.parseInt(sp2[1]), Integer.parseInt(sp2[2]), Integer.parseInt(sp2[3]));
+			// NeuronComparator nc1 = new NeuronComparator(nOrigin, nBinarized1,
+			// ScoreFunctions.AGREEMENT);
+			NeuronComparator nc2 = new NeuronComparator(nOrigin, nBinarized2, ScoreFunctions.AGREEMENT);
+			for (boolean[] sample : samples) {
+				// nc1.update(sample);
+				nc2.update(sample);
 			}
-			nc.update(sample);
-			for (int i = 0; i < sample.length; i++) {
-				if (sample[i]) {
-					double[] dist = nOrigin.getOutputProbs(sample).getProbs();
-					for (int output = 0; output < dist.length; output++) {
-						pixelFreq[i][output] += dist[output];
-					}
-				}
-			}
-			nbSamples++;
-		}
-		System.out.println(nc.getConfMat() + "\nscore=" + nc.getScore());
-		int[][] sumDist = new int[2000][3];
-		for (int run = 0; run < 1000000; run++) {
-			for (int output = 0; output < 3; output++) {
-				int sum = 0;
-				for (int i = 0; i < nBinarized.getWeights().length; i++) {
-					if (Math.random() < (pixelFreq[i][output] / nbSamples)) {
-						sum += nBinarized.getWeights()[i];
-					}
-				}
-				sumDist[sum + 1000][output]++;
+			double maxAgreement = nOrigin.getMaxAgreement();
+			// double diff = nc1.getScore() / samples.size() - nc2.getScore() /
+			// samples.size();
+			double ratio = (nc2.getScore() / samples.size()) / maxAgreement;
+			if (ratio < 0.97) {
+				System.out.println("neuron " + i + ": " + ratio);
 			}
 		}
-		for (int i = 0; i < sumDist.length; i++) {
-			boolean write = false;
-			for (int j = 0; !write && j < sumDist[i].length; j++) {
-				if (sumDist[i][j] != 0) {
-					write = true;
-				}
-			}
-			if (write) {
-				System.out.println((i - 1000) + "\t" + sumDist[i][0] + "\t" + sumDist[i][1] + "\t" + sumDist[i][2]);
-			}
-		}
+		// br1.close();
+		br2.close();
 	}
 
 }

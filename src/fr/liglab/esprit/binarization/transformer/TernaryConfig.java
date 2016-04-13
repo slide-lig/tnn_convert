@@ -1,6 +1,9 @@
 package fr.liglab.esprit.binarization.transformer;
 
-public class TernaryConfig {
+import java.util.Comparator;
+
+public class TernaryConfig implements Comparable<TernaryConfig> {
+	public static final ConfigComparator comparator = new ConfigComparator();
 	public final int th;
 	public final int tl;
 	public final int nbPosWeights;
@@ -16,23 +19,23 @@ public class TernaryConfig {
 		this.score = score;
 	}
 
-	protected final int getTh() {
+	public final int getTh() {
 		return th;
 	}
 
-	protected final int getTl() {
+	public final int getTl() {
 		return tl;
 	}
 
-	protected final int getNbPosWeights() {
+	public final int getNbPosWeights() {
 		return nbPosWeights;
 	}
 
-	protected final int getNbNegWeights() {
+	public final int getNbNegWeights() {
 		return nbNegWeights;
 	}
 
-	protected final double getScore() {
+	public final double getScore() {
 		return score;
 	}
 
@@ -40,6 +43,30 @@ public class TernaryConfig {
 	public String toString() {
 		return "TernaryConfig [th=" + th + ", tl=" + tl + ", nbPosWeights=" + nbPosWeights + ", nbNegWeights="
 				+ nbNegWeights + ", score=" + score + "]";
+	}
+
+	@Override
+	public int compareTo(TernaryConfig o) {
+		int c = Double.compare(this.score, o.score);
+		if (c != 0) {
+			return c;
+		} else {
+			c = this.nbPosWeights - o.nbPosWeights;
+			if (c != 0) {
+				return c;
+			} else {
+				return this.nbNegWeights - o.nbNegWeights;
+			}
+		}
+	}
+
+	public static class ConfigComparator implements Comparator<TernaryConfig> {
+
+		@Override
+		public int compare(TernaryConfig o1, TernaryConfig o2) {
+			return o1.compareTo(o2);
+		}
+
 	}
 
 }

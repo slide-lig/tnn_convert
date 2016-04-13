@@ -131,10 +131,20 @@ public class CachedBinarization {
 			th = this.maxSum;
 			tl = crossMinOneZero;
 		}
-		double score = 0.;
-		score += histo[0].getSum(this.minSum, tl - 1);
-		score += histo[1].getSum(tl, th);
-		score += histo[1].getSum(th + 1, this.maxSum);
+		// double[][] confusion = new double[3][3];
+		// for (int i = 0; i < 3; i++) {
+		// confusion[0][i] = histo[i].getSum(this.minSum, tl - 1);
+		// }
+		// for (int i = 0; i < 3; i++) {
+		// confusion[1][i] = histo[i].getSum(tl, th);
+		// }
+		// for (int i = 0; i < 3; i++) {
+		// confusion[2][i] = histo[i].getSum(th + 1, this.maxSum);
+		// }
+		double minOneWellClassified = histo[0].getSum(this.minSum, tl - 1);
+		double zeroWellClassified = histo[1].getSum(tl, th);
+		double oneWellClassified = histo[2].getSum(th + 1, this.maxSum);
+		double score = minOneWellClassified + zeroWellClassified + oneWellClassified;
 		return new TernaryConfig(th, tl, nbPosWeights, nbNegWeights, score / this.originalNeuronOutput.length);
 	}
 
@@ -184,25 +194,26 @@ public class CachedBinarization {
 
 	public static void main(String[] args) throws IOException {
 		double[] weights = FilesProcessing
-				.getFilteredWeightsSingle("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sw1.txt", 1);
+				.getFilteredWeightsSingle("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sw1.txt", 401);
 		double bias = FilesProcessing.getBias("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sb1.txt",
-				1);
+				401);
 		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<boolean[]> input = FilesProcessing.getFilteredTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
 		CachedBinarization cb = new CachedBinarization(nOrigin, input);
-		TernaryWeightsNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.012217,
-				-0.013479, 19, -16);
+		TernaryWeightsNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.10321,
+				-0.11495, 1, -2);
 		int nbPosWeights = nBinarized.getNbPosWeights();
 		int nbNegWeights = nBinarized.getNbNegWeights();
+		System.out.println("pos " + nbPosWeights + " neg " + nbNegWeights);
 		// for (int i = 0; i < input.size(); i++) {
 		// int sumCached = cb.getSum(i, nbPosWeights, nbNegWeights);
 		// int refSum = nBinarized.getSum(input.get(i));
-		// // if (sumCached != refSum) {
-		// // System.err.println(i + " difference " + sumCached + " vs " +
-		// // refSum);
-		// // }
+		// if (sumCached != refSum) {
+		// System.err.println(i + " difference " + sumCached + " vs " + refSum);
 		// }
-		System.out.println(cb.getBestConfig(nbPosWeights, nbNegWeights));
+		// }
+		System.out.println(cb.getBestConfig(90, 54));
+		System.out.println(cb.getBestConfig(35, 8));
 	}
 }

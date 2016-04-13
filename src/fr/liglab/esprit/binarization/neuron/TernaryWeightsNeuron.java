@@ -1,5 +1,12 @@
 package fr.liglab.esprit.binarization.neuron;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+
 import fr.liglab.esprit.binarization.TernaryProbDistrib;
 
 public class TernaryWeightsNeuron implements TernaryOutputNeuron {
@@ -30,19 +37,60 @@ public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 		}
 	}
 
-	public TernaryWeightsNeuron(double[] weights, int twPosIndex, int twNegIndex, int th, int tl) {
+	public TernaryWeightsNeuron(double[] weights, int nbPosWeights, int nbNegWeights, int th, int tl) {
 		super();
-		this.weights = weights;
-		this.th = th;
-		this.tl = tl;
+		List<Integer> posWeightsIndex = new ArrayList<>(weights.length);
+		List<Integer> negWeightsIndex = new ArrayList<>(weights.length);
 		for (int i = 0; i < weights.length; i++) {
-			if (i > twPosIndex) {
-				this.weights[i] = 1;
-			} else if (i < twNegIndex) {
-				this.weights[i] = -1;
-			} else {
-				this.weights[i] = 0;
+			if (weights[i] > 0) {
+				posWeightsIndex.add(i);
+			} else if (weights[i] < 0) {
+				negWeightsIndex.add(i);
 			}
+		}
+		if (posWeightsIndex.isEmpty() || negWeightsIndex.isEmpty()) {
+			throw new RuntimeException("cannot force pos/neg tw if all weights are positive or negative");
+		} else {
+			Collections.sort(posWeightsIndex, new Comparator<Integer>() {
+
+				@Override
+				public int compare(Integer o1, Integer o2) {
+					Double d1 = weights[o1];
+					Double d2 = weights[o2];
+					int ret = d2.compareTo(d1);
+					if (ret != 0) {
+						return ret;
+					} else {
+						return o1.compareTo(o2);
+					}
+				}
+			});
+			Collections.sort(negWeightsIndex, new Comparator<Integer>() {
+
+				@Override
+				public int compare(Integer o1, Integer o2) {
+					Double d1 = Math.abs(weights[o1]);
+					Double d2 = Math.abs(weights[o2]);
+					int ret = d2.compareTo(d1);
+					if (ret != 0) {
+						return ret;
+					} else {
+						return o1.compareTo(o2);
+					}
+				}
+			});
+			Arrays.fill(weights, 0.);
+			Iterator<Integer> iter = posWeightsIndex.iterator();
+			for (int i = 0; i < nbPosWeights; i++) {
+				weights[iter.next()] = 1.;
+			}
+			iter = negWeightsIndex.iterator();
+			for (int i = 0; i < nbNegWeights; i++) {
+				weights[iter.next()] = -1.;
+			}
+			this.weights = weights;
+			this.th = th;
+			this.tl = tl;
 		}
 	}
 
