@@ -202,11 +202,11 @@ public class CachedBinarization {
 
 	public static void main(String[] args) throws IOException {
 		double[] weights = FilesProcessing
-				.getFilteredWeightsSingle("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sw1.txt", 0);
+				.getWeights("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sw1.txt", 0);
 		double bias = FilesProcessing.getBias("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sb1.txt",
 				0);
 		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
-		List<byte[]> input = FilesProcessing.getFilteredTrainingSet(
+		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
 		CachedBinarization cb = new CachedBinarization(nOrigin, input);
 		TernaryWeightsNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.10321,

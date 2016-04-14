@@ -12,7 +12,7 @@ import fr.liglab.esprit.binarization.FilesProcessing;
 
 public class TwPosAnalysis {
 	public static void main(String[] args) throws Exception {
-		List<double[]> weights = FilesProcessing.getFilteredWeights(
+		List<double[]> weights = FilesProcessing.getAllWeights(
 				"/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sw1.txt", Integer.MAX_VALUE);
 		Iterator<double[]> weightsIter = weights.iterator();
 		List<Double> posSparsityList = new ArrayList<>();

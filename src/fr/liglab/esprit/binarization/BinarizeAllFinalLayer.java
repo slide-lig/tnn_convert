@@ -7,6 +7,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import fr.liglab.esprit.binarization.neuron.CachedBinarization;
 import fr.liglab.esprit.binarization.neuron.GroundTruthNeuron;
 import fr.liglab.esprit.binarization.softmax.BinarizationSoftMaxSearch;
@@ -22,12 +30,39 @@ public class BinarizeAllFinalLayer {
 		private int id;
 	}
 
+	private static final double DEFAULT_CONVERGENCE_THRESHOLD = 0.001;
+
 	public static void main(String[] args) throws Exception {
-		String trainingData = args[0];
-		String weightsData = args[1];
-		// String biasData = args[2];
-		String groundTruthData = args[3];
-		String outputFile = args[4];
+		Options options = new Options();
+		options.addOption(Option.builder("t").longOpt("training").desc("Input training set").hasArg().argName("FILE")
+				.required().build());
+		options.addOption(Option.builder("w").longOpt("weights").desc("Original weights").hasArg().argName("FILE")
+				.required().build());
+		options.addOption(Option.builder("g").longOpt("groundTruth").desc("Ground truth for the training set").hasArg()
+				.argName("FILE").required().build());
+		options.addOption(Option.builder("o").longOpt("output").desc("Neuron configuration output file").hasArg()
+				.argName("FILE").required().build());
+		options.addOption(Option.builder("c").longOpt("convergence").desc(
+				"Threshold to stop optimizing and assume convergence (default " + DEFAULT_CONVERGENCE_THRESHOLD + ")")
+				.hasArg().argName("THRESHOLD").build());
+		CommandLineParser parser = new DefaultParser();
+		CommandLine cmd = null;
+		try {
+			cmd = parser.parse(options, args);
+		} catch (ParseException e) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("BinarizeAll", options, true);
+			System.exit(-1);
+		}
+		String trainingData = cmd.getOptionValue("t");
+		String weightsData = cmd.getOptionValue("w");
+		String groundTruthData = cmd.getOptionValue("g");
+		String outputFile = cmd.getOptionValue("o");
+		double convergenceThreshold = Double
+				.parseDouble(cmd.getOptionValue("c", Double.toString(DEFAULT_CONVERGENCE_THRESHOLD)));
+		if (convergenceThreshold < 0.) {
+			throw new RuntimeException("convergence threshold must be >= 0.");
+		}
 		// double globalTw = FilesProcessing.getCentileAbsWeight(weightsData,
 		// 0.80);
 		List<RealNeuron> lNeurons = new ArrayList<>();
@@ -89,7 +124,7 @@ public class BinarizeAllFinalLayer {
 		System.out.println("starting at " + currentPerf);
 		while (true) {
 			System.out.println("updating neuron " + updatedNeuron);
-			if (Math.abs(configs[updatedNeuron].getScore() - currentPerf) < 0.001) {
+			if (Math.abs(configs[updatedNeuron].getScore() - currentPerf) < convergenceThreshold) {
 				break;
 			}
 			BinarizationSoftMaxSearch sms = new BinarizationSoftMaxSearch(cached, configs, groundTruth, updatedNeuron);

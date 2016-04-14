@@ -57,9 +57,9 @@ public class NeuronComparator {
 		String weightsData = args[1];
 		String biasData = args[2];
 		// String outputFile = args[3];
-		List<double[]> weights = FilesProcessing.getFilteredWeights(weightsData, Integer.MAX_VALUE);
+		List<double[]> weights = FilesProcessing.getAllWeights(weightsData, Integer.MAX_VALUE);
 		List<Double> bias = FilesProcessing.getAllBias(biasData, Integer.MAX_VALUE);
-		List<byte[]> samples = FilesProcessing.getFilteredTrainingSet(testingData, Integer.MAX_VALUE);
+		List<byte[]> samples = FilesProcessing.getAllTrainingSet(testingData, Integer.MAX_VALUE);
 		// BufferedReader br1 = new BufferedReader(new FileReader(
 		// "/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/binary_agreement_asym.txt"));
 		BufferedReader br2 = new BufferedReader(new FileReader(
