@@ -89,10 +89,9 @@ public class BinarizeAll {
 				// originalNeuron.getMaxAgreement());
 				// }
 				if (solutions[t.id].getScore() / originalNeuron.getMaxAgreement() < exhaustiveThreshold) {
-					// synchronized (System.out) {
-					// System.out.println("neuron " + t.id + ": going
-					// exhaustive");
-					// }
+					synchronized (System.out) {
+						System.out.println("neuron " + t.id + ": going exhaustive");
+					}
 					TernaryConfig exhaustiveSearch = paramSearch.getActualBestParallel();
 					synchronized (System.out) {
 						System.out.println("neuron " + t.id + ": exhaustive search changed from "
