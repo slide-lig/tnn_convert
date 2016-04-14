@@ -11,8 +11,8 @@ import fr.liglab.esprit.binarization.TernaryProbDistrib;
 
 public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 	private final double[] weights;
-	private final int th;
-	private final int tl;
+	private int th;
+	private int tl;
 
 	public TernaryWeightsNeuron(double[] weights, int th, int tl) {
 		super();
@@ -135,5 +135,21 @@ public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 
 	public final double[] getWeights() {
 		return this.weights;
+	}
+
+	public final int getTh() {
+		return th;
+	}
+
+	public final void setTh(int th) {
+		this.th = th;
+	}
+
+	public final int getTl() {
+		return tl;
+	}
+
+	public final void setTl(int tl) {
+		this.tl = tl;
 	}
 }

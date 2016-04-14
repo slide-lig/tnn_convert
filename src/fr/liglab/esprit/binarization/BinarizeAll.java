@@ -75,7 +75,7 @@ public class BinarizeAll {
 		final List<byte[]> images = FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE);
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
 		final AtomicInteger nbDone = new AtomicInteger();
-		final List<Runnable> neuronRerun = new ArrayList<>();
+		final List<RealNeuron> neuronRerun = new ArrayList<>();
 		lNeurons.parallelStream().forEach(new Consumer<RealNeuron>() {
 
 			@Override
@@ -95,19 +95,23 @@ public class BinarizeAll {
 						System.out.println("neuron " + t.id + ": marking for exhaustive (" + relativePerf + ")");
 					}
 					synchronized (neuronRerun) {
-						neuronRerun.add(new Runnable() {
-
-							@Override
-							public void run() {
-								final TernaryConfig exhaustiveSearch = paramSearch.getActualBestParallel();
-								synchronized (System.out) {
-									System.out.println("neuron " + t.id + ": exhaustive search changed from "
-											+ relativePerf + " to "
-											+ exhaustiveSearch.getScore() / originalNeuron.getMaxAgreement());
-								}
-								solutions[t.id] = exhaustiveSearch;
-							}
-						});
+						neuronRerun.add(t);
+						// neuronRerun.add(new Runnable() {
+						//
+						// @Override
+						// public void run() {
+						// final TernaryConfig exhaustiveSearch =
+						// paramSearch.getActualBestParallel();
+						// synchronized (System.out) {
+						// System.out.println("neuron " + t.id + ": exhaustive
+						// search changed from "
+						// + relativePerf + " to "
+						// + exhaustiveSearch.getScore() /
+						// originalNeuron.getMaxAgreement());
+						// }
+						// solutions[t.id] = exhaustiveSearch;
+						// }
+						// });
 					}
 
 				}
@@ -120,9 +124,15 @@ public class BinarizeAll {
 			}
 		});
 		System.out.println("doing exhaustive search for " + neuronRerun.size() + " neurons");
-		for (Runnable r : neuronRerun) {
-			r.run();
+		for (RealNeuron t : neuronRerun) {
+			final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, false);
+			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
+					new CachedBinarization(originalNeuron, images));
+			solutions[t.id] = paramSearch.getActualBestParallel();
+			System.out.println("neuron " + t.id + ": exhaustive search changed to "
+					+ solutions[t.id].getScore() / originalNeuron.getMaxAgreement());
 		}
+
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
 		for (TernaryConfig s : solutions) {
 			bw.write(s.nbPosWeights + "," + s.nbNegWeights + "," + s.th + "," + s.tl + "," + s.score + "\n");

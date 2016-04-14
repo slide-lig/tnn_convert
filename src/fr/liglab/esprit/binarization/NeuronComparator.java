@@ -32,23 +32,23 @@ public class NeuronComparator {
 		}
 	}
 
-	protected final TernaryOutputNeuron getN1() {
+	public final TernaryOutputNeuron getN1() {
 		return n1;
 	}
 
-	protected final TernaryOutputNeuron getN2() {
+	public final TernaryOutputNeuron getN2() {
 		return n2;
 	}
 
-	protected final ScoreFunctions getScoreFun() {
+	public final ScoreFunctions getScoreFun() {
 		return scoreFun;
 	}
 
-	protected final TernaryConfusionMatrix getConfMat() {
+	public final TernaryConfusionMatrix getConfMat() {
 		return confMat;
 	}
 
-	protected final double getScore() {
+	public final double getScore() {
 		return this.confMat.getScore(this.scoreFun);
 	}
 
