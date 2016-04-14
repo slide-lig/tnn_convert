@@ -31,6 +31,7 @@ public class BinarizeAllFinalLayer {
 	}
 
 	private static final double DEFAULT_CONVERGENCE_THRESHOLD = 0.001;
+	private static final double DEFAULT_EXHAUSTIVE_THRESHOLD = 0.95;
 
 	public static void main(String[] args) throws Exception {
 		Options options = new Options();
@@ -44,6 +45,9 @@ public class BinarizeAllFinalLayer {
 				.argName("FILE").required().build());
 		options.addOption(Option.builder("c").longOpt("convergence").desc(
 				"Threshold to stop optimizing and assume convergence (default " + DEFAULT_CONVERGENCE_THRESHOLD + ")")
+				.hasArg().argName("THRESHOLD").build());
+		options.addOption(Option.builder("e").longOpt("exhaustive")
+				.desc("Threshold to go exhaustive in initialization (default " + DEFAULT_EXHAUSTIVE_THRESHOLD + ")")
 				.hasArg().argName("THRESHOLD").build());
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
@@ -62,6 +66,11 @@ public class BinarizeAllFinalLayer {
 				.parseDouble(cmd.getOptionValue("c", Double.toString(DEFAULT_CONVERGENCE_THRESHOLD)));
 		if (convergenceThreshold < 0.) {
 			throw new RuntimeException("convergence threshold must be >= 0.");
+		}
+		double exhaustiveThreshold = Double
+				.parseDouble(cmd.getOptionValue("e", Double.toString(DEFAULT_EXHAUSTIVE_THRESHOLD)));
+		if (exhaustiveThreshold < 0. || exhaustiveThreshold > 1.) {
+			throw new RuntimeException("exhaustive threshold must be in [0,1]");
 		}
 		// double globalTw = FilesProcessing.getCentileAbsWeight(weightsData,
 		// 0.80);
@@ -94,7 +103,7 @@ public class BinarizeAllFinalLayer {
 				// "neuron " + t.id + ": " + solutions[t.id].getScore() /
 				// originalNeuron.getMaxAgreement());
 				// }
-				if (solutions[t.id].getScore() < 0.95) {
+				if (solutions[t.id].getScore() < exhaustiveThreshold) {
 					synchronized (System.out) {
 						System.out.println("neuron " + t.id + ": going	exhaustive");
 					}
