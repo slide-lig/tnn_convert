@@ -112,7 +112,7 @@ public class BinarizeAll {
 
 				}
 				int idDone = nbDone.incrementAndGet();
-				if (idDone % 1 == 0) {
+				if (idDone % 100 == 0) {
 					synchronized (System.out) {
 						System.out.println("done " + idDone);
 					}
