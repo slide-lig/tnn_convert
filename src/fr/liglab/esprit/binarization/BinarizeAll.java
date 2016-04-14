@@ -88,15 +88,15 @@ public class BinarizeAll {
 				// "neuron " + t.id + ": " + solutions[t.id].getScore() /
 				// originalNeuron.getMaxAgreement());
 				// }
-				if (solutions[t.id].getScore() / originalNeuron.getMaxAgreement() < exhaustiveThreshold) {
+				double relativePerf = solutions[t.id].getScore() / originalNeuron.getMaxAgreement();
+				if (relativePerf < exhaustiveThreshold) {
 					synchronized (System.out) {
-						System.out.println("neuron " + t.id + ": going exhaustive");
+						System.out.println("neuron " + t.id + ": going exhaustive (" + relativePerf + ")");
 					}
 					TernaryConfig exhaustiveSearch = paramSearch.getActualBestParallel();
 					synchronized (System.out) {
-						System.out.println("neuron " + t.id + ": exhaustive search changed from "
-								+ solutions[t.id].getScore() / originalNeuron.getMaxAgreement() + " to "
-								+ exhaustiveSearch.getScore() / originalNeuron.getMaxAgreement());
+						System.out.println("neuron " + t.id + ": exhaustive search changed from " + relativePerf
+								+ " to " + exhaustiveSearch.getScore() / originalNeuron.getMaxAgreement());
 					}
 					solutions[t.id] = exhaustiveSearch;
 				}
