@@ -30,7 +30,7 @@ public class BinarizeAll {
 	private static final double DEFAULT_EXHAUSTIVE_THRESHOLD = 0.95;
 
 	public static void main(String[] args) throws Exception {
-		Options options = new Options();
+		final Options options = new Options();
 		options.addOption(Option.builder("t").longOpt("training").desc("Input training set").hasArg().argName("FILE")
 				.required().build());
 		options.addOption(Option.builder("w").longOpt("weights").desc("Original weights").hasArg().argName("FILE")
@@ -42,7 +42,7 @@ public class BinarizeAll {
 		options.addOption(Option.builder("e").longOpt("exhaustive")
 				.desc("Threshold to go exhaustive (default " + DEFAULT_EXHAUSTIVE_THRESHOLD + ")").hasArg()
 				.argName("THRESHOLD").build());
-		CommandLineParser parser = new DefaultParser();
+		final CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
 		try {
 			cmd = parser.parse(options, args);
@@ -51,20 +51,20 @@ public class BinarizeAll {
 			formatter.printHelp("BinarizeAll", options, true);
 			System.exit(-1);
 		}
-		String trainingData = cmd.getOptionValue("t");
-		String weightsData = cmd.getOptionValue("w");
-		String biasData = cmd.getOptionValue("b");
-		String outputFile = cmd.getOptionValue("o");
-		double exhaustiveThreshold = Double
+		final String trainingData = cmd.getOptionValue("t");
+		final String weightsData = cmd.getOptionValue("w");
+		final String biasData = cmd.getOptionValue("b");
+		final String outputFile = cmd.getOptionValue("o");
+		final double exhaustiveThreshold = Double
 				.parseDouble(cmd.getOptionValue("e", Double.toString(DEFAULT_EXHAUSTIVE_THRESHOLD)));
 		if (exhaustiveThreshold < 0. || exhaustiveThreshold > 1.) {
 			throw new RuntimeException("exhaustive threshold must be in [0,1]");
 		}
 		// double globalTw = FilesProcessing.getCentileAbsWeight(weightsData,
 		// 0.80);
-		List<RealNeuron> lNeurons = new ArrayList<>();
-		List<double[]> allWeights = FilesProcessing.getAllWeights(weightsData, Integer.MAX_VALUE);
-		List<Double> allBias = FilesProcessing.getAllBias(biasData, Integer.MAX_VALUE);
+		final List<RealNeuron> lNeurons = new ArrayList<>();
+		final List<double[]> allWeights = FilesProcessing.getAllWeights(weightsData, Integer.MAX_VALUE);
+		final List<Double> allBias = FilesProcessing.getAllBias(biasData, Integer.MAX_VALUE);
 		for (int i = 0; i < allWeights.size(); i++) {
 			RealNeuron rl = new RealNeuron();
 			rl.weights = allWeights.get(i);
@@ -72,15 +72,16 @@ public class BinarizeAll {
 			rl.id = i;
 			lNeurons.add(rl);
 		}
-		List<byte[]> images = FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE);
+		final List<byte[]> images = FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE);
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
-		AtomicInteger nbDone = new AtomicInteger();
+		final AtomicInteger nbDone = new AtomicInteger();
+		final List<Runnable> neuronRerun = new ArrayList<>();
 		lNeurons.parallelStream().forEach(new Consumer<RealNeuron>() {
 
 			@Override
-			public void accept(RealNeuron t) {
-				TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, false);
-				BinarizationParamSearch paramSearch = new BinarizationParamSearch(
+			public void accept(final RealNeuron t) {
+				final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, false);
+				final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
 						new CachedBinarization(originalNeuron, images));
 				solutions[t.id] = paramSearch.searchBestLogLog();
 				// synchronized (System.out) {
@@ -88,26 +89,40 @@ public class BinarizeAll {
 				// "neuron " + t.id + ": " + solutions[t.id].getScore() /
 				// originalNeuron.getMaxAgreement());
 				// }
-				double relativePerf = solutions[t.id].getScore() / originalNeuron.getMaxAgreement();
+				final double relativePerf = solutions[t.id].getScore() / originalNeuron.getMaxAgreement();
 				if (relativePerf < exhaustiveThreshold) {
 					synchronized (System.out) {
-						System.out.println("neuron " + t.id + ": going exhaustive (" + relativePerf + ")");
+						System.out.println("neuron " + t.id + ": marking for exhaustive (" + relativePerf + ")");
 					}
-					TernaryConfig exhaustiveSearch = paramSearch.getActualBestParallel();
-					synchronized (System.out) {
-						System.out.println("neuron " + t.id + ": exhaustive search changed from " + relativePerf
-								+ " to " + exhaustiveSearch.getScore() / originalNeuron.getMaxAgreement());
+					synchronized (neuronRerun) {
+						neuronRerun.add(new Runnable() {
+
+							@Override
+							public void run() {
+								final TernaryConfig exhaustiveSearch = paramSearch.getActualBestParallel();
+								synchronized (System.out) {
+									System.out.println("neuron " + t.id + ": exhaustive search changed from "
+											+ relativePerf + " to "
+											+ exhaustiveSearch.getScore() / originalNeuron.getMaxAgreement());
+								}
+								solutions[t.id] = exhaustiveSearch;
+							}
+						});
 					}
-					solutions[t.id] = exhaustiveSearch;
+
 				}
 				int idDone = nbDone.incrementAndGet();
-				if (idDone % 100 == 0) {
+				if (idDone % 1 == 0) {
 					synchronized (System.out) {
 						System.out.println("done " + idDone);
 					}
 				}
 			}
 		});
+		System.out.println("doing exhaustive search for " + neuronRerun.size() + " neurons");
+		for (Runnable r : neuronRerun) {
+			r.run();
+		}
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
 		for (TernaryConfig s : solutions) {
 			bw.write(s.nbPosWeights + "," + s.nbNegWeights + "," + s.th + "," + s.tl + "," + s.score + "\n");
