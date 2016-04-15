@@ -1,5 +1,7 @@
 package fr.liglab.esprit.binarization.neuron;
 
+import org.omg.CORBA.IntHolder;
+
 public class SumHistogram {
 	private final double[] dist;
 	private final int offset;
@@ -16,6 +18,14 @@ public class SumHistogram {
 
 	public int findCrossPoint(SumHistogram other) {
 		return this.findCrossPoint(other, -offset);
+	}
+
+	protected final double[] getDist() {
+		return dist;
+	}
+
+	protected final int getOffset() {
+		return offset;
 	}
 
 	// this supposed to be left of other
@@ -53,6 +63,27 @@ public class SumHistogram {
 		return s;
 	}
 
+	public void findBreakPoints(SumHistogram[] hist, IntHolder thHolder, IntHolder tlHolder) {
+		double tpMinOne = 0.;
+		double tpOne = hist[2].getSum();
+		double bestAgreement = -1.;
+		for (int tl = 0; tl < hist[0].dist.length; tl++) {
+			double tpZero = 0.;
+			for (int th = tl - 1; th < hist[0].dist.length; th++) {
+				// compute quality overall
+				double overallAgreement = tpMinOne + tpOne + tpZero;
+				if (overallAgreement > bestAgreement) {
+					bestAgreement = overallAgreement;
+					thHolder.value = th;
+					tlHolder.value = tl;
+				}
+				tpZero += hist[1].dist[th];
+			}
+			tpMinOne += hist[0].dist[tl];
+			tpOne -= hist[2].dist[tl];
+		}
+	}
+
 	// both inclusive
 	public double getSum(int from, int to) {
 		from += offset;
@@ -67,9 +98,14 @@ public class SumHistogram {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		// for (int i = 0; i < dist.length; i++) {
+		// if (dist[i] != 0) {
+		// sb.append((i - offset) + ": " + dist[i] + ", ");
+		// }
+		// }
 		for (int i = 0; i < dist.length; i++) {
 			if (dist[i] != 0) {
-				sb.append((i - offset) + ": " + dist[i] + ", ");
+				sb.append((i - offset) + "\t" + dist[i] + "\n");
 			}
 		}
 		return "SumHistogram [dist=" + sb.toString() + ", offset=" + offset + ", sum=" + this.getSum() + "]";

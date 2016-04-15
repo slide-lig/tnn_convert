@@ -202,10 +202,8 @@ public class BinarizationParamSearch {
 	}
 
 	public static void main(String[] args) throws Exception {
-		double[] weights = FilesProcessing
-				.getWeights("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sw1.txt", 0);
-		double bias = FilesProcessing.getBias("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sb1.txt",
-				0);
+		double[] weights = FilesProcessing.getWeights("/Users/vleroy/Desktop/neuron10.txt", 0);
+		double bias = FilesProcessing.getBias("/Users/vleroy/Desktop/bias10.txt", 0);
 		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);

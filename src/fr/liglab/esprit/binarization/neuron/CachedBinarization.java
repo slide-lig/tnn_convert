@@ -107,53 +107,36 @@ public class CachedBinarization {
 
 	public TernaryConfig getBestConfig(int nbPosWeights, int nbNegWeights) {
 		SumHistogram[] histo = getSumDist(nbPosWeights, nbNegWeights);
-		// for (SumHistogram h : histo) {
-		// System.out.println(h);
-		// }
-		// TODO start point for search
-		int crossMinOneZero = histo[0].findCrossPoint(histo[1]);
-		int crossZeroOne = histo[1].findCrossPoint(histo[2]);
-		int tl = -666666;// they re not supposed to stay at this value
-		int th = -666666;// they re not supposed to stay at this value
-		if (crossMinOneZero != Integer.MAX_VALUE && crossZeroOne != Integer.MAX_VALUE) {
-			// standard case
-			tl = crossMinOneZero;
-			th = crossZeroOne - 1;
-		} else if (crossMinOneZero == Integer.MAX_VALUE) {
-			// i.e. 0 dist always under -1 dist
-			// never answer 0
-			int crossMinOneOne = histo[0].findCrossPoint(histo[2]);
-			if (crossMinOneOne == Integer.MAX_VALUE) {
-				// i.e. 1 dist always under -1 dist
-				// always answer -1
-				tl = this.maxSum + 1;
-				th = this.maxSum;
-			} else {
-				// answer -1 or +1
-				tl = crossMinOneOne;
-				th = tl - 1;
+		int bestTh = 0;
+		int bestTl = 0;
+		double tpMinOne = 0.;
+		double tpOne = histo[2].getSum();
+		double bestAgreement = -1.;
+		for (int tl = 0; tl < histo[0].getDist().length; tl++) {
+			double tpZero = 0.;
+			double backTpMinOne = tpMinOne;
+			for (int th = tl - 1; th < histo[0].getDist().length; th++) {
+				if (th != -1) {
+					tpZero += histo[1].getDist()[th];
+					tpMinOne -= histo[2].getDist()[th];
+				}
+				// compute quality overall
+				double overallAgreement = tpMinOne + tpOne + tpZero;
+				if (overallAgreement > bestAgreement) {
+					bestAgreement = overallAgreement;
+					bestTh = th;
+					bestTl = tl;
+					// System.out.println((bestTh - histo[0].getOffset()) + " "
+					// + (bestTl - histo[0].getOffset()) + " "
+					// + bestAgreement);
+				}
 			}
-		} else if (crossZeroOne == Integer.MAX_VALUE) {
-			// i.e. 1 dist always under 0 dist
-			// never answer 1
-			th = this.maxSum;
-			tl = crossMinOneZero;
+			tpMinOne = backTpMinOne;
+			tpMinOne += histo[0].getDist()[tl];
+			tpOne -= histo[2].getDist()[tl];
 		}
-		// double[][] confusion = new double[3][3];
-		// for (int i = 0; i < 3; i++) {
-		// confusion[0][i] = histo[i].getSum(this.minSum, tl - 1);
-		// }
-		// for (int i = 0; i < 3; i++) {
-		// confusion[1][i] = histo[i].getSum(tl, th);
-		// }
-		// for (int i = 0; i < 3; i++) {
-		// confusion[2][i] = histo[i].getSum(th + 1, this.maxSum);
-		// }
-		double minOneWellClassified = histo[0].getSum(this.minSum, tl - 1);
-		double zeroWellClassified = histo[1].getSum(tl, th);
-		double oneWellClassified = histo[2].getSum(th + 1, this.maxSum);
-		double score = minOneWellClassified + zeroWellClassified + oneWellClassified;
-		return new TernaryConfig(th, tl, nbPosWeights, nbNegWeights, score / this.originalNeuronOutput.length);
+		return new TernaryConfig(bestTh - histo[0].getOffset(), bestTl - histo[0].getOffset(), nbPosWeights,
+				nbNegWeights, bestAgreement / this.originalNeuronOutput.length);
 	}
 
 	public final int getSum(int inputIndex, int nbPosWeights, int nbNegWeights) {
@@ -201,19 +184,19 @@ public class CachedBinarization {
 	}
 
 	public static void main(String[] args) throws IOException {
-		double[] weights = FilesProcessing
-				.getWeights("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sw1.txt", 0);
-		double bias = FilesProcessing.getBias("/Users/vleroy/workspace/esprit/mnist_binary/StochasticWeights/sb1.txt",
-				0);
+		double[] weights = FilesProcessing.getWeights("/Users/vleroy/Desktop/neuron26.txt", 0);
+		double bias = FilesProcessing.getBias("/Users/vleroy/Desktop/bias26.txt", 0);
 		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
 		CachedBinarization cb = new CachedBinarization(nOrigin, input);
-		TernaryWeightsNeuron nBinarized = new TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.10321,
-				-0.11495, 1, -2);
-		int nbPosWeights = nBinarized.getNbPosWeights();
-		int nbNegWeights = nBinarized.getNbNegWeights();
-		System.out.println("pos " + nbPosWeights + " neg " + nbNegWeights);
+		System.out.println(cb.getBestConfig(8, 161));
+		// TernaryWeightsNeuron nBinarized = new
+		// TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.10321,
+		// -0.11495, 1, -2);
+		// int nbPosWeights = nBinarized.getNbPosWeights();
+		// int nbNegWeights = nBinarized.getNbNegWeights();
+		// System.out.println("pos " + nbPosWeights + " neg " + nbNegWeights);
 		// for (int i = 0; i < input.size(); i++) {
 		// int sumCached = cb.getSum(i, nbPosWeights, nbNegWeights);
 		// int refSum = nBinarized.getSum(input.get(i));
@@ -221,7 +204,7 @@ public class CachedBinarization {
 		// System.err.println(i + " difference " + sumCached + " vs " + refSum);
 		// }
 		// }
-		System.out.println(cb.getBestConfig(90, 54));
-		System.out.println(cb.getBestConfig(35, 8));
+		// System.out.println(cb.getBestConfig(90, 54));
+		// System.out.println(cb.getBestConfig(35, 8));
 	}
 }
