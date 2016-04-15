@@ -202,9 +202,9 @@ public class BinarizationParamSearch {
 	}
 
 	public static void main(String[] args) throws Exception {
-		double[] weights = FilesProcessing.getWeights("/Users/vleroy/Desktop/neuron10.txt", 0);
-		double bias = FilesProcessing.getBias("/Users/vleroy/Desktop/bias10.txt", 0);
-		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
+		double[] weights = FilesProcessing.getWeights("/Users/vleroy/Desktop/neuron26.txt", 0);
+		double bias = FilesProcessing.getBias("/Users/vleroy/Desktop/bias26.txt", 0);
+		TanHNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
 		CachedBinarization cb = new CachedBinarization(nOrigin, input);
@@ -218,7 +218,7 @@ public class BinarizationParamSearch {
 		BinarizationParamSearch bss = new BinarizationParamSearch(cb);
 		// System.out.println(bss.getActualBest());
 		long start = System.currentTimeMillis();
-		System.out.println(bss.searchBestLogLog());
+		System.out.println(bss.searchBestLogLog() + " (best achievable " + nOrigin.getMaxAgreement() + ")");
 		long end = System.currentTimeMillis();
 		System.out.println("Runtime = " + (end - start) + " ms");
 

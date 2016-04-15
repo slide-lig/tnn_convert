@@ -108,7 +108,7 @@ public class SumHistogram {
 				sb.append((i - offset) + "\t" + dist[i] + "\n");
 			}
 		}
-		return "SumHistogram [dist=" + sb.toString() + ", offset=" + offset + ", sum=" + this.getSum() + "]";
+		return "SumHistogram [dist=\n" + sb.toString() + ", offset=" + offset + ", sum=" + this.getSum() + "]";
 	}
 
 }

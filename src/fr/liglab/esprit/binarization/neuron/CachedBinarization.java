@@ -114,11 +114,11 @@ public class CachedBinarization {
 		double bestAgreement = -1.;
 		for (int tl = 0; tl < histo[0].getDist().length; tl++) {
 			double tpZero = 0.;
-			double backTpMinOne = tpMinOne;
+			double backTpOne = tpOne;
 			for (int th = tl - 1; th < histo[0].getDist().length; th++) {
-				if (th != -1) {
+				if (th != tl - 1) {
 					tpZero += histo[1].getDist()[th];
-					tpMinOne -= histo[2].getDist()[th];
+					tpOne -= histo[2].getDist()[th];
 				}
 				// compute quality overall
 				double overallAgreement = tpMinOne + tpOne + tpZero;
@@ -128,10 +128,10 @@ public class CachedBinarization {
 					bestTl = tl;
 					// System.out.println((bestTh - histo[0].getOffset()) + " "
 					// + (bestTl - histo[0].getOffset()) + " "
-					// + bestAgreement);
+					// + bestAgreement + " " + tpMinOne + " " + tpOne + " " + tpZero);
 				}
 			}
-			tpMinOne = backTpMinOne;
+			tpOne = backTpOne;
 			tpMinOne += histo[0].getDist()[tl];
 			tpOne -= histo[2].getDist()[tl];
 		}
@@ -190,7 +190,7 @@ public class CachedBinarization {
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
 		CachedBinarization cb = new CachedBinarization(nOrigin, input);
-		System.out.println(cb.getBestConfig(8, 161));
+		System.out.println(cb.getBestConfig(38, 37));
 		// TernaryWeightsNeuron nBinarized = new
 		// TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.10321,
 		// -0.11495, 1, -2);
