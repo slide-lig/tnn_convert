@@ -37,6 +37,9 @@ public class BinarizeAllFinalLayer {
 		Options options = new Options();
 		options.addOption(Option.builder("t").longOpt("training").desc("Input training set").hasArg().argName("FILE")
 				.required().build());
+		options.addOption(Option.builder("r").longOpt("reference training")
+				.desc("Input training set for the original neuron, to avoid propagating binarization errors").hasArg()
+				.argName("FILE").required(false).build());
 		options.addOption(Option.builder("w").longOpt("weights").desc("Original weights").hasArg().argName("FILE")
 				.required().build());
 		options.addOption(Option.builder("g").longOpt("groundTruth").desc("Ground truth for the training set").hasArg()
@@ -59,6 +62,7 @@ public class BinarizeAllFinalLayer {
 			System.exit(-1);
 		}
 		String trainingData = cmd.getOptionValue("t");
+		final String referenceTrainingData = cmd.getOptionValue("r", null);
 		String weightsData = cmd.getOptionValue("w");
 		String groundTruthData = cmd.getOptionValue("g");
 		String outputFile = cmd.getOptionValue("o");
@@ -87,6 +91,8 @@ public class BinarizeAllFinalLayer {
 			lNeurons.add(rl);
 		}
 		List<byte[]> images = FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE);
+		final List<byte[]> referenceImages = (referenceTrainingData != null)
+				? FilesProcessing.getAllTrainingSet(referenceTrainingData, Integer.MAX_VALUE) : null;
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
 		final CachedBinarization[] cachedResults = new CachedBinarization[lNeurons.size()];
 		AtomicInteger nbDone = new AtomicInteger();
@@ -95,7 +101,7 @@ public class BinarizeAllFinalLayer {
 			@Override
 			public void accept(RealNeuron t) {
 				GroundTruthNeuron originalNeuron = new GroundTruthNeuron(t.weights, groundTruth, t.id);
-				cachedResults[t.id] = new CachedBinarization(originalNeuron, images);
+				cachedResults[t.id] = new CachedBinarization(originalNeuron, images, referenceImages);
 				BinarizationParamSearch paramSearch = new BinarizationParamSearch(cachedResults[t.id]);
 				solutions[t.id] = paramSearch.searchBestLogLog();
 				// synchronized (System.out) {

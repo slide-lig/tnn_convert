@@ -9,7 +9,6 @@ import java.util.stream.IntStream;
 import fr.liglab.esprit.binarization.FilesProcessing;
 import fr.liglab.esprit.binarization.neuron.CachedBinarization;
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;
-import fr.liglab.esprit.binarization.neuron.TernaryOutputNeuron;
 
 public class BinarizationParamSearch {
 
@@ -207,7 +206,7 @@ public class BinarizationParamSearch {
 		TanHNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
-		CachedBinarization cb = new CachedBinarization(nOrigin, input);
+		CachedBinarization cb = new CachedBinarization(nOrigin, input, null);
 		// TernaryWeightsNeuron nBinarized = new
 		// TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length),
 		// 0.030318,
@@ -216,7 +215,7 @@ public class BinarizationParamSearch {
 		// int nbNegWeights = nBinarized.getNbNegWeights();
 		// System.out.println(cb.getBestConfig(114, 71));
 		BinarizationParamSearch bss = new BinarizationParamSearch(cb);
-		// System.out.println(bss.getActualBest());
+		System.out.println(bss.getActualBest());
 		long start = System.currentTimeMillis();
 		System.out.println(bss.searchBestLogLog() + " (best achievable " + nOrigin.getMaxAgreement() + ")");
 		long end = System.currentTimeMillis();

@@ -2,7 +2,6 @@ package fr.liglab.esprit.binarization.neuron;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -22,10 +21,14 @@ public class CachedBinarization {
 	// final private int twNegMaxIndex;
 
 	// force posneg always active
-	public CachedBinarization(final TernaryOutputNeuron originalNeuron, final List<byte[]> input) {
+	public CachedBinarization(final TernaryOutputNeuron originalNeuron, final List<byte[]> input,
+			List<byte[]> referenceInput) {
+		if (referenceInput == null) {
+			referenceInput = input;
+		}
 		this.originalNeuronOutput = new TernaryProbDistrib[input.size()];
-		for (int i = 0; i < input.size(); i++) {
-			this.originalNeuronOutput[i] = originalNeuron.getOutputProbs(input.get(i));
+		for (int i = 0; i < referenceInput.size(); i++) {
+			this.originalNeuronOutput[i] = originalNeuron.getOutputProbs(referenceInput.get(i));
 		}
 		List<Integer> posWeightsIndex = new ArrayList<>(originalNeuron.getWeights().length);
 		List<Integer> negWeightsIndex = new ArrayList<>(originalNeuron.getWeights().length);
@@ -107,12 +110,29 @@ public class CachedBinarization {
 
 	public TernaryConfig getBestConfig(int nbPosWeights, int nbNegWeights) {
 		SumHistogram[] histo = getSumDist(nbPosWeights, nbNegWeights);
+		// int tlLB = 0;
+		// for (; tlLB < histo[0].getDist().length && histo[0].getDist()[tlLB]
+		// >= histo[1].getDist()[tlLB]
+		// && histo[0].getDist()[tlLB] >= histo[2].getDist()[tlLB]; tlLB++) {
+		// }
+		// if (tlLB != 0) {
+		// tlLB--;
+		// }
+		// int thUB = histo[0].getDist().length - 1;
+		// for (; thUB >= 0 && histo[2].getDist()[thUB] >=
+		// histo[1].getDist()[thUB]
+		// && histo[2].getDist()[thUB] >= histo[0].getDist()[thUB]; thUB--) {
+		// }
+		// if (thUB != histo[0].getDist().length - 1) {
+		// thUB++;
+		// }
 		int bestTh = 0;
 		int bestTl = 0;
 		double tpMinOne = 0.;
 		double tpOne = histo[2].getSum();
 		double bestAgreement = -1.;
-		for (int tl = 0; tl < histo[0].getDist().length; tl++) {
+		for (int tl = 0; tl <= histo[0].getDist().length; tl++) {
+			// if (tl >= tlLB) {
 			double tpZero = 0.;
 			double backTpOne = tpOne;
 			for (int th = tl - 1; th < histo[0].getDist().length; th++) {
@@ -126,14 +146,18 @@ public class CachedBinarization {
 					bestAgreement = overallAgreement;
 					bestTh = th;
 					bestTl = tl;
-					// System.out.println((bestTh - histo[0].getOffset()) + " "
-					// + (bestTl - histo[0].getOffset()) + " "
-					// + bestAgreement + " " + tpMinOne + " " + tpOne + " " + tpZero);
+					// System.out.println((bestTh - histo[0].getOffset()) +
+					// " " + (bestTl - histo[0].getOffset()) + " "
+					// + bestAgreement + " " + tpMinOne + " " + tpZero + " "
+					// + tpOne);
 				}
 			}
 			tpOne = backTpOne;
-			tpMinOne += histo[0].getDist()[tl];
-			tpOne -= histo[2].getDist()[tl];
+			// }
+			if (tl != histo[0].getDist().length) {
+				tpMinOne += histo[0].getDist()[tl];
+				tpOne -= histo[2].getDist()[tl];
+			}
 		}
 		return new TernaryConfig(bestTh - histo[0].getOffset(), bestTl - histo[0].getOffset(), nbPosWeights,
 				nbNegWeights, bestAgreement / this.originalNeuronOutput.length);
@@ -189,8 +213,12 @@ public class CachedBinarization {
 		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
-		CachedBinarization cb = new CachedBinarization(nOrigin, input);
-		System.out.println(cb.getBestConfig(38, 37));
+		CachedBinarization cb = new CachedBinarization(nOrigin, input,null);
+		long startTime = System.currentTimeMillis();
+		for (int i = 0; i < 1; i++) {
+			cb.getBestConfig(38, 37);
+		}
+		System.out.println("time : " + (System.currentTimeMillis() - startTime));
 		// TernaryWeightsNeuron nBinarized = new
 		// TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.10321,
 		// -0.11495, 1, -2);

@@ -95,6 +95,15 @@ public class SumHistogram {
 		return s;
 	}
 
+	// both inclusive
+	public double getSumRaw(int from, int to) {
+		double s = 0;
+		for (int i = from; i <= to; i++) {
+			s += this.dist[i];
+		}
+		return s;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

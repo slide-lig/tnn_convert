@@ -33,6 +33,9 @@ public class BinarizeAll {
 		final Options options = new Options();
 		options.addOption(Option.builder("t").longOpt("training").desc("Input training set").hasArg().argName("FILE")
 				.required().build());
+		options.addOption(Option.builder("r").longOpt("reference training")
+				.desc("Input training set for the original neuron, to avoid propagating binarization errors").hasArg()
+				.argName("FILE").required(false).build());
 		options.addOption(Option.builder("w").longOpt("weights").desc("Original weights").hasArg().argName("FILE")
 				.required().build());
 		options.addOption(
@@ -52,6 +55,7 @@ public class BinarizeAll {
 			System.exit(-1);
 		}
 		final String trainingData = cmd.getOptionValue("t");
+		final String referenceTrainingData = cmd.getOptionValue("r", null);
 		final String weightsData = cmd.getOptionValue("w");
 		final String biasData = cmd.getOptionValue("b");
 		final String outputFile = cmd.getOptionValue("o");
@@ -73,6 +77,8 @@ public class BinarizeAll {
 			lNeurons.add(rl);
 		}
 		final List<byte[]> images = FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE);
+		final List<byte[]> referenceImages = (referenceTrainingData != null)
+				? FilesProcessing.getAllTrainingSet(referenceTrainingData, Integer.MAX_VALUE) : null;
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
 		final AtomicInteger nbDone = new AtomicInteger();
 		final List<RealNeuron> neuronRerun = new ArrayList<>();
@@ -82,7 +88,7 @@ public class BinarizeAll {
 			public void accept(final RealNeuron t) {
 				final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, false);
 				final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
-						new CachedBinarization(originalNeuron, images));
+						new CachedBinarization(originalNeuron, images, referenceImages));
 				solutions[t.id] = paramSearch.searchBestLogLog();
 				// synchronized (System.out) {
 				// System.out.println(
@@ -127,7 +133,7 @@ public class BinarizeAll {
 		for (RealNeuron t : neuronRerun) {
 			final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, false);
 			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
-					new CachedBinarization(originalNeuron, images));
+					new CachedBinarization(originalNeuron, images, referenceImages));
 			solutions[t.id] = paramSearch.getActualBestParallel();
 			System.out.println("neuron " + t.id + ": exhaustive search changed to "
 					+ solutions[t.id].getScore() / originalNeuron.getMaxAgreement());
