@@ -58,7 +58,7 @@ public class BinarizeAllFinalLayer {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("BinarizeAll", options, true);
+			formatter.printHelp("BinarizeAllFinalLayer", options, true);
 			System.exit(-1);
 		}
 		String trainingData = cmd.getOptionValue("t");
