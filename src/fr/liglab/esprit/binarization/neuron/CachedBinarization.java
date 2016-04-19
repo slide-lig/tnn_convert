@@ -26,7 +26,7 @@ public class CachedBinarization {
 		if (referenceInput == null) {
 			referenceInput = input;
 		}
-		this.originalNeuronOutput = new TernaryProbDistrib[input.size()];
+		this.originalNeuronOutput = new TernaryProbDistrib[referenceInput.size()];
 		for (int i = 0; i < referenceInput.size(); i++) {
 			this.originalNeuronOutput[i] = originalNeuron.getOutputProbs(referenceInput.get(i));
 		}
