@@ -67,10 +67,10 @@
         <version>2.4</version>
         <configuration>
           <archive>
-            <manifest>
+            <!--<manifest>
               <addClasspath>false</addClasspath>
               <mainClass>fr.liglab.esprit.binarization.BinarizeAll</mainClass>
-            </manifest>
+            </manifest>-->
           </archive>
         </configuration>
         <executions>
