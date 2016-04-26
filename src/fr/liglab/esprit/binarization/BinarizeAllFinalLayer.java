@@ -143,7 +143,8 @@ public class BinarizeAllFinalLayer {
 				break;
 			}
 			BinarizationSoftMaxSearch sms = new BinarizationSoftMaxSearch(cached, configs, groundTruth, updatedNeuron);
-			SoftMaxConfig config = sms.searchBestLogLog();
+			SoftMaxConfig config = sms.getActualBestParallel();
+			// SoftMaxConfig config = sms.searchBestLogLog();
 			System.out.println("candidate version of neuron " + updatedNeuron + ":\t" + config);
 			if (config.getScore() > currentPerf) {
 				configs[updatedNeuron] = config;
