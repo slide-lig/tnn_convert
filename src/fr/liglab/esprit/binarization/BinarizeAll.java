@@ -45,6 +45,7 @@ public class BinarizeAll {
 		options.addOption(Option.builder("e").longOpt("exhaustive")
 				.desc("Threshold to go exhaustive (default " + DEFAULT_EXHAUSTIVE_THRESHOLD + ")").hasArg()
 				.argName("THRESHOLD").build());
+		options.addOption(Option.builder("d").longOpt("consider original neuron deterministic").hasArg(false).build());
 		final CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
 		try {
@@ -61,6 +62,7 @@ public class BinarizeAll {
 		final String outputFile = cmd.getOptionValue("o");
 		final double exhaustiveThreshold = Double
 				.parseDouble(cmd.getOptionValue("e", Double.toString(DEFAULT_EXHAUSTIVE_THRESHOLD)));
+		final boolean deterministic = cmd.hasOption("d");
 		if (exhaustiveThreshold < 0. || exhaustiveThreshold > 1.) {
 			throw new RuntimeException("exhaustive threshold must be in [0,1]");
 		}
@@ -86,7 +88,7 @@ public class BinarizeAll {
 
 			@Override
 			public void accept(final RealNeuron t) {
-				final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, false);
+				final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, deterministic);
 				final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
 						new CachedBinarization(originalNeuron, images, referenceImages));
 				solutions[t.id] = paramSearch.searchBestLogLog();

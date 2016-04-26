@@ -61,17 +61,17 @@ public class BinarizeAllFinalLayer {
 			formatter.printHelp("BinarizeAllFinalLayer", options, true);
 			System.exit(-1);
 		}
-		String trainingData = cmd.getOptionValue("t");
+		final String trainingData = cmd.getOptionValue("t");
 		final String referenceTrainingData = cmd.getOptionValue("r", null);
-		String weightsData = cmd.getOptionValue("w");
-		String groundTruthData = cmd.getOptionValue("g");
-		String outputFile = cmd.getOptionValue("o");
+		final String weightsData = cmd.getOptionValue("w");
+		final String groundTruthData = cmd.getOptionValue("g");
+		final String outputFile = cmd.getOptionValue("o");
 		double convergenceThreshold = Double
 				.parseDouble(cmd.getOptionValue("c", Double.toString(DEFAULT_CONVERGENCE_THRESHOLD)));
 		if (convergenceThreshold < 0.) {
 			throw new RuntimeException("convergence threshold must be >= 0.");
 		}
-		double exhaustiveThreshold = Double
+		final double exhaustiveThreshold = Double
 				.parseDouble(cmd.getOptionValue("e", Double.toString(DEFAULT_EXHAUSTIVE_THRESHOLD)));
 		if (exhaustiveThreshold < 0. || exhaustiveThreshold > 1.) {
 			throw new RuntimeException("exhaustive threshold must be in [0,1]");
@@ -139,7 +139,7 @@ public class BinarizeAllFinalLayer {
 		System.out.println("starting at " + currentPerf);
 		while (true) {
 			System.out.println("updating neuron " + updatedNeuron);
-			if (Math.abs(configs[updatedNeuron].getScore() - currentPerf) < convergenceThreshold) {
+			if (Math.abs(configs[updatedNeuron].getScore() - currentPerf) <= convergenceThreshold) {
 				break;
 			}
 			BinarizationSoftMaxSearch sms = new BinarizationSoftMaxSearch(cached, configs, groundTruth, updatedNeuron);
