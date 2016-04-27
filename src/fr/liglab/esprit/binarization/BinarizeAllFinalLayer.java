@@ -49,9 +49,11 @@ public class BinarizeAllFinalLayer {
 		options.addOption(Option.builder("c").longOpt("convergence").desc(
 				"Threshold to stop optimizing and assume convergence (default " + DEFAULT_CONVERGENCE_THRESHOLD + ")")
 				.hasArg().argName("THRESHOLD").build());
-		options.addOption(Option.builder("e").longOpt("exhaustive")
+		options.addOption(Option.builder("ei").longOpt("exhaustive initialization threshold")
 				.desc("Threshold to go exhaustive in initialization (default " + DEFAULT_EXHAUSTIVE_THRESHOLD + ")")
 				.hasArg().argName("THRESHOLD").build());
+		options.addOption(Option.builder("ec").longOpt("exhaustive convergence")
+				.desc("Flag to use exhaustive search during the convergence loop instead of loglog").build());
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
 		try {
@@ -71,11 +73,12 @@ public class BinarizeAllFinalLayer {
 		if (convergenceThreshold < 0.) {
 			throw new RuntimeException("convergence threshold must be >= 0.");
 		}
-		final double exhaustiveThreshold = Double
-				.parseDouble(cmd.getOptionValue("e", Double.toString(DEFAULT_EXHAUSTIVE_THRESHOLD)));
-		if (exhaustiveThreshold < 0. || exhaustiveThreshold > 1.) {
+		final double exhaustiveThresholdInit = Double
+				.parseDouble(cmd.getOptionValue("ei", Double.toString(DEFAULT_EXHAUSTIVE_THRESHOLD)));
+		if (exhaustiveThresholdInit < 0. || exhaustiveThresholdInit > 1.) {
 			throw new RuntimeException("exhaustive threshold must be in [0,1]");
 		}
+		final boolean exhaustiveOnConvergence = cmd.hasOption("ec");
 		// double globalTw = FilesProcessing.getCentileAbsWeight(weightsData,
 		// 0.80);
 		List<RealNeuron> lNeurons = new ArrayList<>();
@@ -109,7 +112,7 @@ public class BinarizeAllFinalLayer {
 				// "neuron " + t.id + ": " + solutions[t.id].getScore() /
 				// originalNeuron.getMaxAgreement());
 				// }
-				if (solutions[t.id].getScore() < exhaustiveThreshold) {
+				if (solutions[t.id].getScore() < exhaustiveThresholdInit) {
 					synchronized (System.out) {
 						System.out.println("neuron " + t.id + ": going	exhaustive");
 					}
@@ -143,8 +146,12 @@ public class BinarizeAllFinalLayer {
 				break;
 			}
 			BinarizationSoftMaxSearch sms = new BinarizationSoftMaxSearch(cached, configs, groundTruth, updatedNeuron);
-			SoftMaxConfig config = sms.getActualBestParallel();
-			// SoftMaxConfig config = sms.searchBestLogLog();
+			SoftMaxConfig config;
+			if (exhaustiveOnConvergence) {
+				config = sms.getActualBestParallel();
+			} else {
+				config = sms.searchBestLogLog();
+			}
 			System.out.println("candidate version of neuron " + updatedNeuron + ":\t" + config);
 			if (config.getScore() > currentPerf) {
 				configs[updatedNeuron] = config;
