@@ -232,7 +232,7 @@ public class CachedBinarization {
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
 		CachedBinarization cb = new CachedBinarization(nOrigin, input, null);
 		long startTime = System.currentTimeMillis();
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 10000; i++) {
 			cb.getBestConfig(38, 37);
 		}
 		System.out.println("time : " + (System.currentTimeMillis() - startTime));
