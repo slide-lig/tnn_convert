@@ -213,12 +213,14 @@ public class CachedBinarization {
 		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
-		CachedBinarization cb = new CachedBinarization(nOrigin, input,null);
+		CachedBinarization cb = new CachedBinarization(nOrigin, input, null);
 		long startTime = System.currentTimeMillis();
-		for (int i = 0; i < 1; i++) {
-			cb.getBestConfig(38, 37);
+		TernaryConfig conf = null;
+		for (int i = 0; i < 10000; i++) {
+			conf = cb.getBestConfig(38, 37);
 		}
 		System.out.println("time : " + (System.currentTimeMillis() - startTime));
+		System.out.println(conf);
 		// TernaryWeightsNeuron nBinarized = new
 		// TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length), 0.10321,
 		// -0.11495, 1, -2);
