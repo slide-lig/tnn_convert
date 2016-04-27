@@ -17,6 +17,7 @@ public class CachedBinarization {
 	final private TernaryProbDistrib[] originalNeuronOutput;
 	final private int maxSum;
 	final private int minSum;
+	final private int inputSize;
 	// final private int twPosMinIndex;
 	// final private int twNegMaxIndex;
 
@@ -26,6 +27,7 @@ public class CachedBinarization {
 		if (referenceInput == null) {
 			referenceInput = input;
 		}
+		this.inputSize = input.size();
 		this.originalNeuronOutput = new TernaryProbDistrib[referenceInput.size()];
 		for (int i = 0; i < referenceInput.size(); i++) {
 			this.originalNeuronOutput[i] = originalNeuron.getOutputProbs(referenceInput.get(i));
@@ -70,13 +72,13 @@ public class CachedBinarization {
 					}
 				}
 			});
-			this.posSums = new int[input.size()][posWeightsIndex.size()];
-			this.negSums = new int[input.size()][negWeightsIndex.size()];
+			this.posSums = new int[posWeightsIndex.size()][inputSize];
+			this.negSums = new int[negWeightsIndex.size()][inputSize];
 			int tmpMaxSumPos = 0;
 			int tmpMinSumPos = 0;
 			int tmpMaxSumNeg = 0;
 			int tmpMinSumNeg = 0;
-			for (int sampleIndex = 0; sampleIndex < input.size(); sampleIndex++) {
+			for (int sampleIndex = 0; sampleIndex < inputSize; sampleIndex++) {
 				byte[] sample = input.get(sampleIndex);
 				int sum = 0;
 				Iterator<Integer> indexIter = posWeightsIndex.iterator();
@@ -84,7 +86,7 @@ public class CachedBinarization {
 					sum += sample[indexIter.next()];
 					tmpMaxSumPos = Math.max(tmpMaxSumPos, sum);
 					tmpMinSumPos = Math.min(tmpMinSumPos, sum);
-					this.posSums[sampleIndex][i] = sum;
+					this.posSums[i][sampleIndex] = sum;
 				}
 				sum = 0;
 				indexIter = negWeightsIndex.iterator();
@@ -92,7 +94,7 @@ public class CachedBinarization {
 					sum -= sample[indexIter.next()];
 					tmpMaxSumNeg = Math.max(tmpMaxSumNeg, sum);
 					tmpMinSumNeg = Math.min(tmpMinSumNeg, sum);
-					this.negSums[sampleIndex][i] = sum;
+					this.negSums[i][sampleIndex] = sum;
 				}
 			}
 			this.maxSum = tmpMaxSumPos + tmpMaxSumNeg;
@@ -101,11 +103,11 @@ public class CachedBinarization {
 	}
 
 	public final int[][] getPosSums() {
-		return posSums;
+		return this.posSums;
 	}
 
 	public final int[][] getNegSums() {
-		return negSums;
+		return this.negSums;
 	}
 
 	public TernaryConfig getBestConfig(int nbPosWeights, int nbNegWeights) {
@@ -166,11 +168,11 @@ public class CachedBinarization {
 	public final int getSum(int inputIndex, int nbPosWeights, int nbNegWeights) {
 		int posSum = 0;
 		if (nbPosWeights > 0) {
-			posSum = this.posSums[inputIndex][nbPosWeights - 1];
+			posSum = this.posSums[nbPosWeights - 1][inputIndex];
 		}
 		int negSum = 0;
 		if (nbNegWeights > 0) {
-			negSum = this.negSums[inputIndex][nbNegWeights - 1];
+			negSum = this.negSums[nbNegWeights - 1][inputIndex];
 		}
 		return posSum + negSum;
 	}
@@ -188,21 +190,36 @@ public class CachedBinarization {
 		for (int i = 0; i < s.length; i++) {
 			s[i] = new SumHistogram(this.minSum, this.maxSum);
 		}
-		for (int i = 0; i < this.posSums.length; i++) {
-			int sum = this.getSum(i, nbPosWeights, nbNegWeights);
-			for (int j = 0; j < 3; j++) {
-				s[j].addOccurence(sum, this.originalNeuronOutput[i].getProbs()[j]);
+		int[] sums;
+		if (nbPosWeights == 0) {
+			if (nbNegWeights == 0) {
+				for (int j = 0; j < 3; j++) {
+					double freq = 0.;
+					for (TernaryProbDistrib dist : this.originalNeuronOutput) {
+						freq += dist.getProbs()[j];
+					}
+					s[j].addOccurence(0, freq);
+				}
+				return s;
+			} else {
+				sums = this.negSums[nbNegWeights - 1];
 			}
-			// if (this.originalNeuronOutput[i].getProbs()[0] > 0.) {
-			// if (Math.random() < this.originalNeuronOutput[i].getProbs()[0]) {
-			// s[0].addOccurence(sum, 1.);
-			// }
-			// } else if (Math.random() <
-			// this.originalNeuronOutput[i].getProbs()[2]) {
-			// s[1].addOccurence(sum, 1.);
-			// } else {
-			// s[2].addOccurence(sum, 1.);
-			// }
+		} else {
+			if (nbNegWeights == 0) {
+				sums = this.posSums[nbPosWeights - 1];
+			} else {
+				int[] pos = this.posSums[nbPosWeights - 1];
+				int[] neg = this.negSums[nbNegWeights - 1];
+				sums = new int[inputSize];
+				for (int i = 0; i < inputSize; i++) {
+					sums[i] = pos[i] + neg[i];
+				}
+			}
+		}
+		for (int i = 0; i < sums.length; i++) {
+			for (int j = 0; j < 3; j++) {
+				s[j].addOccurence(sums[i], this.originalNeuronOutput[i].getProbs()[j]);
+			}
 		}
 		return s;
 	}
@@ -213,7 +230,7 @@ public class CachedBinarization {
 		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
-		CachedBinarization cb = new CachedBinarization(nOrigin, input,null);
+		CachedBinarization cb = new CachedBinarization(nOrigin, input, null);
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < 1; i++) {
 			cb.getBestConfig(38, 37);
