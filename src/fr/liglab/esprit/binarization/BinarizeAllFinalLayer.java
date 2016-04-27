@@ -135,7 +135,8 @@ public class BinarizeAllFinalLayer {
 		CachedSoftmax[] cached = new CachedSoftmax[solutions.length];
 		for (int i = 0; i < solutions.length; i++) {
 			configs[i] = new SoftMaxConfig(-solutions[i].th, solutions[i].nbPosWeights, solutions[i].nbNegWeights, -1.);
-			cached[i] = new CachedSoftmax(cachedResults[i].getPosSums(), cachedResults[i].getNegSums());
+			cached[i] = new CachedSoftmax(cachedResults[i].getPosSums(), cachedResults[i].getNegSums(),
+					cachedResults[i].getInputSize());
 		}
 		double currentPerf = CachedSoftmax.getCurrentPerf(cached, configs, groundTruth);
 		int updatedNeuron = 0;

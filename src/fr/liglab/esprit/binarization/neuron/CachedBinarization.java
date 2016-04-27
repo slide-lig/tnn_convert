@@ -178,11 +178,11 @@ public class CachedBinarization {
 	}
 
 	public int getNbPosPossibilities() {
-		return this.posSums[0].length;
+		return this.posSums.length;
 	}
 
 	public int getNbNegPossibilities() {
-		return this.negSums[0].length;
+		return this.negSums.length;
 	}
 
 	private SumHistogram[] getSumDist(int nbPosWeights, int nbNegWeights) {
@@ -193,14 +193,7 @@ public class CachedBinarization {
 		int[] sums;
 		if (nbPosWeights == 0) {
 			if (nbNegWeights == 0) {
-				for (int j = 0; j < 3; j++) {
-					double freq = 0.;
-					for (TernaryProbDistrib dist : this.originalNeuronOutput) {
-						freq += dist.getProbs()[j];
-					}
-					s[j].addOccurence(0, freq);
-				}
-				return s;
+				sums = new int[inputSize];
 			} else {
 				sums = this.negSums[nbNegWeights - 1];
 			}
@@ -222,6 +215,10 @@ public class CachedBinarization {
 			}
 		}
 		return s;
+	}
+
+	public final int getInputSize() {
+		return inputSize;
 	}
 
 	public static void main(String[] args) throws IOException {

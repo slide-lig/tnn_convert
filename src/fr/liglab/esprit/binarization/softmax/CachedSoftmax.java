@@ -9,15 +9,18 @@ import java.util.List;
 public class CachedSoftmax {
 	final private int[][] posSums;
 	final private int[][] negSums;
+	final private int inputSize;
 
-	public CachedSoftmax(int[][] posSums, int[][] negSums) {
+	public CachedSoftmax(final int[][] posSums, final int[][] negSums, final int inputSize) {
 		super();
 		this.posSums = posSums;
 		this.negSums = negSums;
+		this.inputSize = inputSize;
 	}
 
 	// force posneg always active
 	public CachedSoftmax(final double[] originalWeights, final List<byte[]> input) {
+		this.inputSize = input.size();
 		List<Integer> posWeightsIndex = new ArrayList<>(originalWeights.length);
 		List<Integer> negWeightsIndex = new ArrayList<>(originalWeights.length);
 		for (int i = 0; i < originalWeights.length; i++) {
@@ -58,13 +61,13 @@ public class CachedSoftmax {
 					}
 				}
 			});
-			this.posSums = new int[input.size()][posWeightsIndex.size()];
-			this.negSums = new int[input.size()][negWeightsIndex.size()];
+			this.posSums = new int[posWeightsIndex.size()][inputSize];
+			this.negSums = new int[negWeightsIndex.size()][inputSize];
 			// int tmpMaxSumPos = 0;
 			// int tmpMinSumPos = 0;
 			// int tmpMaxSumNeg = 0;
 			// int tmpMinSumNeg = 0;
-			for (int sampleIndex = 0; sampleIndex < input.size(); sampleIndex++) {
+			for (int sampleIndex = 0; sampleIndex < inputSize; sampleIndex++) {
 				byte[] sample = input.get(sampleIndex);
 				int sum = 0;
 				Iterator<Integer> indexIter = posWeightsIndex.iterator();
@@ -72,7 +75,7 @@ public class CachedSoftmax {
 					sum += sample[indexIter.next()];
 					// tmpMaxSumPos = Math.max(tmpMaxSumPos, sum);
 					// tmpMinSumPos = Math.min(tmpMinSumPos, sum);
-					this.posSums[sampleIndex][i] = sum;
+					this.posSums[i][sampleIndex] = sum;
 				}
 				sum = 0;
 				indexIter = negWeightsIndex.iterator();
@@ -80,7 +83,7 @@ public class CachedSoftmax {
 					sum -= sample[indexIter.next()];
 					// tmpMaxSumNeg = Math.max(tmpMaxSumNeg, sum);
 					// tmpMinSumNeg = Math.min(tmpMinSumNeg, sum);
-					this.negSums[sampleIndex][i] = sum;
+					this.negSums[i][sampleIndex] = sum;
 				}
 			}
 		}
@@ -89,26 +92,30 @@ public class CachedSoftmax {
 	public static double getCurrentPerf(final CachedSoftmax[] cachedNeurons, final SoftMaxConfig[] existingConfigs,
 			final int[] groundTruth) {
 		double perf = 0.;
+		int[][] inputSums = new int[cachedNeurons.length][];
+		for (int neuron = 0; neuron < inputSums.length; neuron++) {
+			inputSums[neuron] = cachedNeurons[neuron].getSums(existingConfigs[neuron].nbPosWeights,
+					existingConfigs[neuron].nbNegWeights);
+		}
 		for (int input = 0; input < groundTruth.length; input++) {
-			int[] sums = new int[cachedNeurons.length];
 			int bestFalseSum = Integer.MIN_VALUE;
 			int nbHavingBestFalseSum = 0;
-			for (int neuron = 0; neuron < sums.length; neuron++) {
-				sums[neuron] = cachedNeurons[neuron].getSum(input, existingConfigs[neuron].nbPosWeights,
-						existingConfigs[neuron].nbNegWeights) + existingConfigs[neuron].getBias();
+			for (int neuron = 0; neuron < cachedNeurons.length; neuron++) {
+				int sum = inputSums[neuron][input] + existingConfigs[neuron].getBias();
 				if (neuron != groundTruth[input]) {
-					if (sums[neuron] > bestFalseSum) {
-						bestFalseSum = sums[neuron];
+					if (sum > bestFalseSum) {
+						bestFalseSum = sum;
 						nbHavingBestFalseSum = 1;
-					} else if (sums[neuron] == bestFalseSum) {
+					} else if (sum == bestFalseSum) {
 						nbHavingBestFalseSum++;
 					}
 				}
 			}
-			if (bestFalseSum > sums[groundTruth[input]]) {
+			int groundTruthSum = inputSums[groundTruth[input]][input] + existingConfigs[groundTruth[input]].getBias();
+			if (bestFalseSum > groundTruthSum) {
 				// this one is lost, doesn t depend on this neuron
 				// nbBadClassifications++;
-			} else if (bestFalseSum == sums[groundTruth[input]]) {
+			} else if (bestFalseSum == groundTruthSum) {
 				perf += 1. / (nbHavingBestFalseSum + 1);
 			} else {
 				perf += 1.;
@@ -129,19 +136,26 @@ public class CachedSoftmax {
 		double[][] biasScores = new double[MB_BIAS_OPTIONS][3];
 		// int nbMatch = 0;
 		// int nbOther = 0;
+		int[][] inputSums = new int[cachedNeurons.length][];
+		for (int neuron = 0; neuron < inputSums.length; neuron++) {
+			if (neuron != configuredNeuronIndex) {
+				inputSums[neuron] = cachedNeurons[neuron].getSums(existingConfigs[neuron].nbPosWeights,
+						existingConfigs[neuron].nbNegWeights);
+			} else {
+				inputSums[neuron] = cachedNeurons[neuron].getSums(nbPosWeights, nbNegWeights);
+			}
+		}
 		for (int input = 0; input < groundTruth.length; input++) {
-			int[] sums = new int[cachedNeurons.length];
 			int bestFalseSum = Integer.MIN_VALUE;
 			int nbHavingBestFalseSum = 0;
-			for (int neuron = 0; neuron < sums.length; neuron++) {
+			for (int neuron = 0; neuron < cachedNeurons.length; neuron++) {
 				if (neuron != configuredNeuronIndex) {
-					sums[neuron] = cachedNeurons[neuron].getSum(input, existingConfigs[neuron].nbPosWeights,
-							existingConfigs[neuron].nbNegWeights) + existingConfigs[neuron].getBias();
+					int sum = inputSums[neuron][input] + existingConfigs[neuron].getBias();
 					if (neuron != groundTruth[input]) {
-						if (sums[neuron] > bestFalseSum) {
-							bestFalseSum = sums[neuron];
+						if (sum > bestFalseSum) {
+							bestFalseSum = sum;
 							nbHavingBestFalseSum = 1;
-						} else if (sums[neuron] == bestFalseSum) {
+						} else if (sum == bestFalseSum) {
 							nbHavingBestFalseSum++;
 						}
 					}
@@ -149,7 +163,7 @@ public class CachedSoftmax {
 			}
 			if (groundTruth[input] == configuredNeuronIndex) {
 				// nbMatch++;
-				int baseSum = cachedNeurons[configuredNeuronIndex].getSum(input, nbPosWeights, nbNegWeights);
+				int baseSum = inputSums[configuredNeuronIndex][input];
 				int biasForEqual = bestFalseSum - baseSum;
 				maxSeenBias = Math.max(maxSeenBias, biasForEqual);
 				minSeenBias = Math.min(minSeenBias, biasForEqual);
@@ -157,18 +171,20 @@ public class CachedSoftmax {
 				biasScores[biasForEqual - MIN_BIAS][2] += 1.;
 			} else {
 				// nbOther++;
-				if (bestFalseSum > sums[groundTruth[input]]) {
+				int groundTruthSum = inputSums[groundTruth[input]][input]
+						+ existingConfigs[groundTruth[input]].getBias();
+				if (bestFalseSum > groundTruthSum) {
 					// this one is lost, doesn t depend on this neuron
 					// nbBadClassifications++;
 				} else {
 					// this neuron is important because good neuron can lead
 					// for
 					// sum (maybe equal with others)
-					int baseSum = cachedNeurons[configuredNeuronIndex].getSum(input, nbPosWeights, nbNegWeights);
-					int biasForEqual = sums[groundTruth[input]] - baseSum;
+					int baseSum = inputSums[configuredNeuronIndex][input];
+					int biasForEqual = groundTruthSum - baseSum;
 					maxSeenBias = Math.max(maxSeenBias, biasForEqual);
 					minSeenBias = Math.min(minSeenBias, biasForEqual);
-					if (bestFalseSum == sums[groundTruth[input]]) {
+					if (bestFalseSum == groundTruthSum) {
 						biasScores[biasForEqual - MIN_BIAS][0] += 1. / (nbHavingBestFalseSum + 1);
 						biasScores[biasForEqual - MIN_BIAS][1] += 1. / (nbHavingBestFalseSum + 2);
 					} else {
@@ -207,23 +223,47 @@ public class CachedSoftmax {
 		return new SoftMaxConfig(bestBias + MIN_BIAS, nbPosWeights, nbNegWeights, bestScore);
 	}
 
-	public final int getSum(int inputIndex, int nbPosWeights, int nbNegWeights) {
-		int posSum = 0;
-		if (nbPosWeights > 0) {
-			posSum = this.posSums[inputIndex][nbPosWeights - 1];
+	// public final int getSum(int inputIndex, int nbPosWeights, int
+	// nbNegWeights) {
+	// int posSum = 0;
+	// if (nbPosWeights > 0) {
+	// posSum = this.posSums[inputIndex][nbPosWeights - 1];
+	// }
+	// int negSum = 0;
+	// if (nbNegWeights > 0) {
+	// negSum = this.negSums[inputIndex][nbNegWeights - 1];
+	// }
+	// return posSum + negSum;
+	// }
+
+	public final int[] getSums(int nbPosWeights, int nbNegWeights) {
+		int[] sums;
+		if (nbPosWeights == 0) {
+			if (nbNegWeights == 0) {
+				sums = new int[inputSize];
+			} else {
+				sums = this.negSums[nbNegWeights - 1];
+			}
+		} else {
+			if (nbNegWeights == 0) {
+				sums = this.posSums[nbPosWeights - 1];
+			} else {
+				int[] pos = this.posSums[nbPosWeights - 1];
+				int[] neg = this.negSums[nbNegWeights - 1];
+				sums = new int[inputSize];
+				for (int i = 0; i < inputSize; i++) {
+					sums[i] = pos[i] + neg[i];
+				}
+			}
 		}
-		int negSum = 0;
-		if (nbNegWeights > 0) {
-			negSum = this.negSums[inputIndex][nbNegWeights - 1];
-		}
-		return posSum + negSum;
+		return sums;
 	}
 
 	public int getNbPosPossibilities() {
-		return this.posSums[0].length;
+		return this.posSums.length;
 	}
 
 	public int getNbNegPossibilities() {
-		return this.negSums[0].length;
+		return this.negSums.length;
 	}
 }
