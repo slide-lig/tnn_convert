@@ -4,12 +4,12 @@ import java.util.Comparator;
 
 public class SoftMaxConfig implements Comparable<SoftMaxConfig> {
 	public static final ConfigComparator comparator = new ConfigComparator();
-	public final int bias;
+	public final short bias;
 	public final int nbPosWeights;
 	public final int nbNegWeights;
 	public double score;
 
-	public SoftMaxConfig(int bias, int nbPosWeights, int nbNegWeights, double score) {
+	public SoftMaxConfig(short bias, int nbPosWeights, int nbNegWeights, double score) {
 		super();
 		this.bias = bias;
 		this.nbPosWeights = nbPosWeights;
@@ -17,7 +17,7 @@ public class SoftMaxConfig implements Comparable<SoftMaxConfig> {
 		this.score = score;
 	}
 
-	protected final int getBias() {
+	protected final short getBias() {
 		return bias;
 	}
 

@@ -127,15 +127,15 @@ public class CachedSoftmax {
 			final SoftMaxConfig[] existingConfigs, final int[] groundTruth, final int configuredNeuronIndex,
 			final int nbPosWeights, final int nbNegWeights) {
 		// int nbBadClassifications = 0;
-		final int MIN_BIAS = -2000;
-		final int MB_BIAS_OPTIONS = 4000;
-		int maxSeenBias = Integer.MIN_VALUE;
-		int minSeenBias = Integer.MAX_VALUE;
+		final short MIN_BIAS = -2000;
+		final short MB_BIAS_OPTIONS = 4000;
+		short maxSeenBias = Short.MIN_VALUE;
+		short minSeenBias = Short.MAX_VALUE;
 		// 0 is below, 1 is here, 2 is above
-		double[][] biasScores = new double[MB_BIAS_OPTIONS][3];
+		final double[][] biasScores = new double[MB_BIAS_OPTIONS][3];
 		// int nbMatch = 0;
 		// int nbOther = 0;
-		short[][] inputSums = new short[cachedNeurons.length][];
+		final short[][] inputSums = new short[cachedNeurons.length][];
 		for (int neuron = 0; neuron < inputSums.length; neuron++) {
 			if (neuron != configuredNeuronIndex) {
 				inputSums[neuron] = cachedNeurons[neuron].getSums(existingConfigs[neuron]);
@@ -144,11 +144,11 @@ public class CachedSoftmax {
 			}
 		}
 		for (int input = 0; input < groundTruth.length; input++) {
-			int bestFalseSum = Integer.MIN_VALUE;
+			short bestFalseSum = Short.MIN_VALUE;
 			int nbHavingBestFalseSum = 0;
 			for (int neuron = 0; neuron < cachedNeurons.length; neuron++) {
 				if (neuron != configuredNeuronIndex) {
-					final int sum = inputSums[neuron][input];
+					final short sum = inputSums[neuron][input];
 					if (neuron != groundTruth[input]) {
 						if (sum > bestFalseSum) {
 							bestFalseSum = sum;
@@ -161,15 +161,21 @@ public class CachedSoftmax {
 			}
 			if (groundTruth[input] == configuredNeuronIndex) {
 				// nbMatch++;
-				int baseSum = inputSums[configuredNeuronIndex][input];
-				int biasForEqual = bestFalseSum - baseSum;
-				maxSeenBias = Math.max(maxSeenBias, biasForEqual);
-				minSeenBias = Math.min(minSeenBias, biasForEqual);
+				final short baseSum = inputSums[configuredNeuronIndex][input];
+				final short biasForEqual = (short) (bestFalseSum - baseSum);
+				if (biasForEqual > maxSeenBias) {
+					maxSeenBias = biasForEqual;
+				}
+				if (biasForEqual < minSeenBias) {
+					minSeenBias = biasForEqual;
+				}
+				// maxSeenBias = Math.max(maxSeenBias, biasForEqual);
+				// minSeenBias = Math.min(minSeenBias, biasForEqual);
 				biasScores[biasForEqual - MIN_BIAS][1] += 1. / (nbHavingBestFalseSum + 1);
 				biasScores[biasForEqual - MIN_BIAS][2] += 1.;
 			} else {
 				// nbOther++;
-				int groundTruthSum = inputSums[groundTruth[input]][input];
+				final short groundTruthSum = inputSums[groundTruth[input]][input];
 				if (bestFalseSum > groundTruthSum) {
 					// this one is lost, doesn t depend on this neuron
 					// nbBadClassifications++;
@@ -177,10 +183,16 @@ public class CachedSoftmax {
 					// this neuron is important because good neuron can lead
 					// for
 					// sum (maybe equal with others)
-					int baseSum = inputSums[configuredNeuronIndex][input];
-					int biasForEqual = groundTruthSum - baseSum;
-					maxSeenBias = Math.max(maxSeenBias, biasForEqual);
-					minSeenBias = Math.min(minSeenBias, biasForEqual);
+					final short baseSum = inputSums[configuredNeuronIndex][input];
+					short biasForEqual = (short) (groundTruthSum - baseSum);
+					if (biasForEqual > maxSeenBias) {
+						maxSeenBias = biasForEqual;
+					}
+					if (biasForEqual < minSeenBias) {
+						minSeenBias = biasForEqual;
+					}
+					// maxSeenBias = Math.max(maxSeenBias, biasForEqual);
+					// minSeenBias = Math.min(minSeenBias, biasForEqual);
 					if (bestFalseSum == groundTruthSum) {
 						biasScores[biasForEqual - MIN_BIAS][0] += 1. / (nbHavingBestFalseSum + 1);
 						biasScores[biasForEqual - MIN_BIAS][1] += 1. / (nbHavingBestFalseSum + 2);
@@ -217,7 +229,7 @@ public class CachedSoftmax {
 		// System.out.println(sb.toString());
 		// System.out.println("wtf");
 		// }
-		return new SoftMaxConfig(bestBias + MIN_BIAS, nbPosWeights, nbNegWeights, bestScore);
+		return new SoftMaxConfig((short) (bestBias + MIN_BIAS), nbPosWeights, nbNegWeights, bestScore);
 	}
 
 	// public final int getSum(int inputIndex, int nbPosWeights, int

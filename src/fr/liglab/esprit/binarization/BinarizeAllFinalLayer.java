@@ -134,7 +134,8 @@ public class BinarizeAllFinalLayer {
 		SoftMaxConfig[] configs = new SoftMaxConfig[solutions.length];
 		CachedSoftmax[] cached = new CachedSoftmax[solutions.length];
 		for (int i = 0; i < solutions.length; i++) {
-			configs[i] = new SoftMaxConfig(-solutions[i].th, solutions[i].nbPosWeights, solutions[i].nbNegWeights, -1.);
+			configs[i] = new SoftMaxConfig((short) -solutions[i].th, solutions[i].nbPosWeights,
+					solutions[i].nbNegWeights, -1.);
 			cached[i] = new CachedSoftmax(cachedResults[i].getPosSums(), cachedResults[i].getNegSums(),
 					cachedResults[i].getInputSize());
 		}
