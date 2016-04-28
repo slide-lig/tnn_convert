@@ -38,6 +38,34 @@ public class SoftMaxConfig implements Comparable<SoftMaxConfig> {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + bias;
+		result = prime * result + nbNegWeights;
+		result = prime * result + nbPosWeights;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SoftMaxConfig other = (SoftMaxConfig) obj;
+		if (bias != other.bias)
+			return false;
+		if (nbNegWeights != other.nbNegWeights)
+			return false;
+		if (nbPosWeights != other.nbPosWeights)
+			return false;
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		return "SoftMaxConfig [bias=" + bias + ", nbPosWeights=" + nbPosWeights + ", nbNegWeights=" + nbNegWeights
 				+ ", score=" + score + "]";

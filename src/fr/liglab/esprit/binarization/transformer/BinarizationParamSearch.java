@@ -215,9 +215,9 @@ public class BinarizationParamSearch {
 		// int nbNegWeights = nBinarized.getNbNegWeights();
 		// System.out.println(cb.getBestConfig(114, 71));
 		BinarizationParamSearch bss = new BinarizationParamSearch(cb);
-		System.out.println(bss.getActualBest());
+		// System.out.println(bss.getActualBest());
 		long start = System.currentTimeMillis();
-		System.out.println(bss.searchBestLogLog() + " (best achievable " + nOrigin.getMaxAgreement() + ")");
+		System.out.println(bss.getActualBestParallel() + " (best achievable " + nOrigin.getMaxAgreement() + ")");
 		long end = System.currentTimeMillis();
 		System.out.println("Runtime = " + (end - start) + " ms");
 
