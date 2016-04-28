@@ -12,11 +12,11 @@ import fr.liglab.esprit.binarization.TernaryProbDistrib;
 import fr.liglab.esprit.binarization.transformer.TernaryConfig;
 
 public class CachedBinarization {
-	final private int[][] posSums;
-	final private int[][] negSums;
+	final private short[][] posSums;
+	final private short[][] negSums;
 	final private TernaryProbDistrib[] originalNeuronOutput;
-	final private int maxSum;
-	final private int minSum;
+	final private short maxSum;
+	final private short minSum;
 	final private int inputSize;
 	// final private int twPosMinIndex;
 	// final private int twNegMaxIndex;
@@ -72,41 +72,53 @@ public class CachedBinarization {
 					}
 				}
 			});
-			this.posSums = new int[posWeightsIndex.size()][inputSize];
-			this.negSums = new int[negWeightsIndex.size()][inputSize];
-			int tmpMaxSumPos = 0;
-			int tmpMinSumPos = 0;
-			int tmpMaxSumNeg = 0;
-			int tmpMinSumNeg = 0;
+			this.posSums = new short[posWeightsIndex.size()][inputSize];
+			this.negSums = new short[negWeightsIndex.size()][inputSize];
+			short tmpMaxSumPos = 0;
+			short tmpMinSumPos = 0;
+			short tmpMaxSumNeg = 0;
+			short tmpMinSumNeg = 0;
 			for (int sampleIndex = 0; sampleIndex < inputSize; sampleIndex++) {
 				byte[] sample = input.get(sampleIndex);
-				int sum = 0;
+				short sum = 0;
 				Iterator<Integer> indexIter = posWeightsIndex.iterator();
 				for (int i = 0; indexIter.hasNext(); i++) {
 					sum += sample[indexIter.next()];
-					tmpMaxSumPos = Math.max(tmpMaxSumPos, sum);
-					tmpMinSumPos = Math.min(tmpMinSumPos, sum);
+					if (sum > tmpMaxSumPos) {
+						tmpMaxSumPos = sum;
+					}
+					if (sum < tmpMinSumPos) {
+						tmpMinSumPos = sum;
+					}
+					// tmpMaxSumPos = Math.max(tmpMaxSumPos, sum);
+					// tmpMinSumPos = Math.min(tmpMinSumPos, sum);
 					this.posSums[i][sampleIndex] = sum;
 				}
 				sum = 0;
 				indexIter = negWeightsIndex.iterator();
 				for (int i = 0; indexIter.hasNext(); i++) {
 					sum -= sample[indexIter.next()];
-					tmpMaxSumNeg = Math.max(tmpMaxSumNeg, sum);
-					tmpMinSumNeg = Math.min(tmpMinSumNeg, sum);
+					if (sum > tmpMaxSumNeg) {
+						tmpMaxSumNeg = sum;
+					}
+					if (sum < tmpMinSumNeg) {
+						tmpMinSumNeg = sum;
+					}
+					// tmpMaxSumNeg = Math.max(tmpMaxSumNeg, sum);
+					// tmpMinSumNeg = Math.min(tmpMinSumNeg, sum);
 					this.negSums[i][sampleIndex] = sum;
 				}
 			}
-			this.maxSum = tmpMaxSumPos + tmpMaxSumNeg;
-			this.minSum = tmpMinSumPos + tmpMinSumNeg;
+			this.maxSum = (short) (tmpMaxSumPos + tmpMaxSumNeg);
+			this.minSum = (short) (tmpMinSumPos + tmpMinSumNeg);
 		}
 	}
 
-	public final int[][] getPosSums() {
+	public final short[][] getPosSums() {
 		return this.posSums;
 	}
 
-	public final int[][] getNegSums() {
+	public final short[][] getNegSums() {
 		return this.negSums;
 	}
 
@@ -190,10 +202,10 @@ public class CachedBinarization {
 		for (int i = 0; i < s.length; i++) {
 			s[i] = new SumHistogram(this.minSum, this.maxSum);
 		}
-		int[] sums;
+		short[] sums;
 		if (nbPosWeights == 0) {
 			if (nbNegWeights == 0) {
-				sums = new int[inputSize];
+				sums = new short[inputSize];
 			} else {
 				sums = this.negSums[nbNegWeights - 1];
 			}
@@ -201,11 +213,11 @@ public class CachedBinarization {
 			if (nbNegWeights == 0) {
 				sums = this.posSums[nbPosWeights - 1];
 			} else {
-				int[] pos = this.posSums[nbPosWeights - 1];
-				int[] neg = this.negSums[nbNegWeights - 1];
-				sums = new int[inputSize];
+				short[] pos = this.posSums[nbPosWeights - 1];
+				short[] neg = this.negSums[nbNegWeights - 1];
+				sums = new short[inputSize];
 				for (int i = 0; i < inputSize; i++) {
-					sums[i] = pos[i] + neg[i];
+					sums[i] = (short) (pos[i] + neg[i]);
 				}
 			}
 		}
