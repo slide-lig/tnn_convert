@@ -434,7 +434,7 @@ public class FilesProcessing {
 
 	public static void genConvolutionInput(final int inputSize, final int convolutionSize, final String inputFile,
 			final String outputFile) throws Exception {
-		List<byte[]> trainingSet = FilesProcessing.getAllTrainingSet(inputFile, 1);
+		List<byte[]> trainingSet = FilesProcessing.getAllTrainingSet(inputFile, Integer.MAX_VALUE);
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
 		for (byte[] input : trainingSet) {
 			for (int x = 0; x < (inputSize - convolutionSize + 1); x++) {
