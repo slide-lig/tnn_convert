@@ -442,7 +442,8 @@ public class FilesProcessing {
 					for (int i = 0; i < convolutionSize; i++) {
 						for (int j = 0; j < convolutionSize; j++) {
 							int pos = (i + x) * inputSize + (j + y);
-							System.out.println(x + "," + y + "," + i + "," + j + "," + pos);
+							// System.out.println(x + "," + y + "," + i + "," +
+							// j + "," + pos);
 							if (!(i == 0 && j == 0)) {
 								bw.write(",");
 							}
