@@ -1,7 +1,9 @@
 package fr.liglab.esprit.binarization;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,72 +11,136 @@ import java.util.Collections;
 import java.util.List;
 
 public class FilesProcessing {
-	//	private static final int nbAlwaysZeroPixels = 348;
-//	private static final boolean[] alwaysZeroPixels = { true, true, true, true, true, true, true, true, true, true,
-//			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-//			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-//			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-//			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false,
-//			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-//			true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true,
-//			true, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true,
-//			false, true, true, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true,
-//			true, false, true, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true,
-//			true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true,
-//			true, true, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true,
-//			true, true, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, true,
-//			true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, true, true, true, true, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, true, true, true, true, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, true, true, true, true, true, true, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, true, true, true, true, true, true, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, true, true, true, true, true, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, true, true, true, true, true, true, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true,
-//			false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true,
-//			true, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true,
-//			true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true,
-//			true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true,
-//			true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true,
-//			true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true,
-//			true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true,
-//			true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false,
-//			false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true,
-//			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-//			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-//			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-//			true, true, true, true, true, true, true, true, true };
+	// private static final int nbAlwaysZeroPixels = 348;
+	// private static final boolean[] alwaysZeroPixels = { true, true, true,
+	// true, true, true, true, true, true, true,
+	// true, true, true, true, true, true, true, true, true, true, true, true,
+	// true, true, true, true, true, true,
+	// true, true, true, true, true, true, true, true, true, true, true, true,
+	// true, true, true, true, true, true,
+	// true, true, true, true, true, true, true, true, true, true, true, true,
+	// true, true, true, true, true, true,
+	// true, true, true, true, true, true, true, true, true, true, true, true,
+	// true, true, true, false, false,
+	// true, true, true, true, true, true, true, true, true, true, true, true,
+	// true, true, true, true, true, true,
+	// true, true, true, true, true, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, true, true, true, true,
+	// true, true, true, true, true, true,
+	// true, true, false, true, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, true, true, true,
+	// true, true, true, true, true,
+	// false, true, true, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, true,
+	// true, true, true, true, true, true,
+	// true, false, true, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, true, true, true, true, true,
+	// true, true, true, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, true, true, true, true, true,
+	// true, true, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, true, true, true,
+	// true, true, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, true,
+	// true, true, true, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// true, true, true, true, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, true, true, true, true, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, true, true, true, true, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, true, true, true, true, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, true, true, true, true, true, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, true, true, true, true, true, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, true, true, true, true, true, true,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, true, true, true, true,
+	// true, true, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, true, true, true,
+	// true, true, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, true, true, true,
+	// true, true, true, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// true, true, true, true, true, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, true, true, true, true, true,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, true, true, true, true, true,
+	// true, false, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, true, true, true, true,
+	// true, true, true, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, true, true, true, true,
+	// true, true, true, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, false, true, true, true, true,
+	// true, true, true, false, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// false, true, true, true, true, true,
+	// true, true, true, true, false, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, false,
+	// true, true, true, true, true, true,
+	// true, true, true, true, true, false, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, false, true,
+	// true, true, true, true, true, true,
+	// true, true, true, true, true, true, false, false, false, false, false,
+	// false, false, false, false, false,
+	// false, false, false, false, false, false, false, false, true, true, true,
+	// true, true, true, true, true,
+	// true, true, true, true, true, true, true, true, true, true, true, true,
+	// true, true, true, true, true, true,
+	// true, true, true, true, true, true, true, true, true, true, true, true,
+	// true, true, true, true, true, true,
+	// true, true, true, true, true, true, true, true, true, true, true, true,
+	// true, true, true, true, true, true,
+	// true, true, true, true, true, true, true, true, true };
 
 	public static int getHeadingZeros(String file) throws IOException {
 		int nbZeros = Integer.MAX_VALUE;
@@ -190,29 +256,30 @@ public class FilesProcessing {
 		return allWeights;
 	}
 
-//	public static List<double[]> getFilteredWeights(String file, int nbNeurons) throws IOException {
-//		List<double[]> allWeights = new ArrayList<>();
-//		BufferedReader br = new BufferedReader(new FileReader(file));
-//		String line;
-//
-//		while ((line = br.readLine()) != null) {
-//			if (allWeights.size() == nbNeurons) {
-//				break;
-//			}
-//			String[] input = line.split(",");
-//			double[] weights = new double[input.length - nbAlwaysZeroPixels];
-//			int insertPos = 0;
-//			for (int i = 0; i < input.length; i++) {
-//				if (!alwaysZeroPixels[i]) {
-//					weights[insertPos] = Double.parseDouble(input[i]);
-//					insertPos++;
-//				}
-//			}
-//			allWeights.add(weights);
-//		}
-//		br.close();
-//		return allWeights;
-//	}
+	// public static List<double[]> getFilteredWeights(String file, int
+	// nbNeurons) throws IOException {
+	// List<double[]> allWeights = new ArrayList<>();
+	// BufferedReader br = new BufferedReader(new FileReader(file));
+	// String line;
+	//
+	// while ((line = br.readLine()) != null) {
+	// if (allWeights.size() == nbNeurons) {
+	// break;
+	// }
+	// String[] input = line.split(",");
+	// double[] weights = new double[input.length - nbAlwaysZeroPixels];
+	// int insertPos = 0;
+	// for (int i = 0; i < input.length; i++) {
+	// if (!alwaysZeroPixels[i]) {
+	// weights[insertPos] = Double.parseDouble(input[i]);
+	// insertPos++;
+	// }
+	// }
+	// allWeights.add(weights);
+	// }
+	// br.close();
+	// return allWeights;
+	// }
 
 	public static double[] getWeights(String file, int neuronIndex) throws IOException {
 		// load neuron weights
@@ -235,30 +302,31 @@ public class FilesProcessing {
 		return weights;
 	}
 
-//	public static double[] getFilteredWeightsSingle(String file, int neuronIndex) throws IOException {
-//		// load neuron weights
-//		BufferedReader br = new BufferedReader(new FileReader(file));
-//		String line;
-//		int lineNumber = 0;
-//		double[] weights = null;
-//		while ((line = br.readLine()) != null) {
-//			if (lineNumber == neuronIndex) {
-//				String[] input = line.split(",");
-//				weights = new double[input.length - nbAlwaysZeroPixels];
-//				int insertPos = 0;
-//				for (int i = 0; i < input.length; i++) {
-//					if (!alwaysZeroPixels[i]) {
-//						weights[insertPos] = Double.parseDouble(input[i]);
-//						insertPos++;
-//					}
-//				}
-//				break;
-//			}
-//			lineNumber++;
-//		}
-//		br.close();
-//		return weights;
-//	}
+	// public static double[] getFilteredWeightsSingle(String file, int
+	// neuronIndex) throws IOException {
+	// // load neuron weights
+	// BufferedReader br = new BufferedReader(new FileReader(file));
+	// String line;
+	// int lineNumber = 0;
+	// double[] weights = null;
+	// while ((line = br.readLine()) != null) {
+	// if (lineNumber == neuronIndex) {
+	// String[] input = line.split(",");
+	// weights = new double[input.length - nbAlwaysZeroPixels];
+	// int insertPos = 0;
+	// for (int i = 0; i < input.length; i++) {
+	// if (!alwaysZeroPixels[i]) {
+	// weights[insertPos] = Double.parseDouble(input[i]);
+	// insertPos++;
+	// }
+	// }
+	// break;
+	// }
+	// lineNumber++;
+	// }
+	// br.close();
+	// return weights;
+	// }
 
 	public static List<Double> getAllBias(String file, int nbNeurons) throws IOException {
 		List<Double> allBias = new ArrayList<>();
@@ -362,6 +430,30 @@ public class FilesProcessing {
 			output[i] = Integer.parseInt(trainingset.get(i)) - 1;
 		}
 		return output;
+	}
+
+	public static void genConvolutionInput(final int inputSize, final int convolutionSize, final String inputFile,
+			final String outputFile) throws Exception {
+		List<byte[]> trainingSet = FilesProcessing.getAllTrainingSet(inputFile, 1);
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
+		for (byte[] input : trainingSet) {
+			for (int x = 0; x < (inputSize - convolutionSize + 1); x++) {
+				for (int y = 0; y < (inputSize - convolutionSize + 1); y++) {
+					for (int i = 0; i < convolutionSize; i++) {
+						for (int j = 0; j < convolutionSize; j++) {
+							int pos = (i + x) * inputSize + (j + y);
+							System.out.println(x + "," + y + "," + i + "," + j + "," + pos);
+							if (!(i == 0 && j == 0)) {
+								bw.write(",");
+							}
+							bw.write(Byte.toString(input[pos]));
+						}
+					}
+					bw.write("\n");
+				}
+			}
+		}
+		bw.close();
 	}
 
 	public static void main(String[] args) throws Exception {
