@@ -33,7 +33,7 @@ public class ConvolutionInputGen {
 			System.exit(-1);
 		}
 		final String trainingData = cmd.getOptionValue("t");
-		final String outputFile = cmd.getOptionValue("r");
+		final String outputFile = cmd.getOptionValue("o");
 		final int imageSize = Integer.parseInt(cmd.getOptionValue("is"));
 		final int convolutionSize = Integer.parseInt(cmd.getOptionValue("cs"));
 		FilesProcessing.genConvolutionInput(imageSize, convolutionSize, trainingData, outputFile);
