@@ -11,7 +11,7 @@ import fr.liglab.esprit.binarization.FilesProcessing;
 import fr.liglab.esprit.binarization.TernaryProbDistrib;
 import fr.liglab.esprit.binarization.transformer.TernaryConfig;
 
-public class CachedBinarization {
+public class CachedBinarization implements IBinarization {
 	final private short[][] posSums;
 	final private short[][] negSums;
 	final private TernaryProbDistrib[] originalNeuronOutput;
@@ -122,6 +122,14 @@ public class CachedBinarization {
 		return this.negSums;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * fr.liglab.esprit.binarization.neuron.IBinarization#getBestConfig(int,
+	 * int)
+	 */
+	@Override
 	public TernaryConfig getBestConfig(int nbPosWeights, int nbNegWeights) {
 		SumHistogram[] histo = getSumDist(nbPosWeights, nbNegWeights);
 		// int tlLB = 0;
@@ -189,10 +197,26 @@ public class CachedBinarization {
 		return posSum + negSum;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * fr.liglab.esprit.binarization.neuron.IBinarization#getNbPosPossibilities(
+	 * )
+	 */
+	@Override
 	public int getNbPosPossibilities() {
 		return this.posSums.length;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * fr.liglab.esprit.binarization.neuron.IBinarization#getNbNegPossibilities(
+	 * )
+	 */
+	@Override
 	public int getNbNegPossibilities() {
 		return this.negSums.length;
 	}
@@ -229,6 +253,12 @@ public class CachedBinarization {
 		return s;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.liglab.esprit.binarization.neuron.IBinarization#getInputSize()
+	 */
+	@Override
 	public final int getInputSize() {
 		return inputSize;
 	}
@@ -239,7 +269,7 @@ public class CachedBinarization {
 		TernaryOutputNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
-		CachedBinarization cb = new CachedBinarization(nOrigin, input, null);
+		IBinarization cb = new CachedBinarization(nOrigin, input, null);
 		long startTime = System.currentTimeMillis();
 		TernaryConfig conf = null;
 		for (int i = 0; i < 10000; i++) {

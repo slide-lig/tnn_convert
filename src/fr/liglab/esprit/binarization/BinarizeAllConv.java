@@ -16,11 +16,12 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import fr.liglab.esprit.binarization.neuron.CachedBinarization;
+import fr.liglab.esprit.binarization.neuron.ConvBinarization;
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 import fr.liglab.esprit.binarization.transformer.BinarizationParamSearch;
 import fr.liglab.esprit.binarization.transformer.TernaryConfig;
 
-public class BinarizeAll {
+public class BinarizeAllConv {
 	public static class RealNeuron {
 		private double bias;
 		private double[] weights;
@@ -46,6 +47,14 @@ public class BinarizeAll {
 				.desc("Threshold to go exhaustive (default " + DEFAULT_EXHAUSTIVE_THRESHOLD + ")").hasArg()
 				.argName("THRESHOLD").build());
 		options.addOption(Option.builder("d").longOpt("consider original neuron deterministic").hasArg(false).build());
+		options.addOption(
+				Option.builder("ix").desc("Input horizontal size").hasArg().argName("SIZE").required().build());
+		options.addOption(Option.builder("iy").desc("input vertical size").hasArg().argName("SIZE").required().build());
+		options.addOption(
+				Option.builder("cx").desc("Convolution horizontal size").hasArg().argName("SIZE").required().build());
+		options.addOption(
+				Option.builder("cy").desc("Convolution vertical size").hasArg().argName("SIZE").required().build());
+		options.addOption(Option.builder("imax").desc("Max val in input").hasArg().argName("VAL").required().build());
 		final CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
 		try {
@@ -66,6 +75,11 @@ public class BinarizeAll {
 		if (exhaustiveThreshold < 0. || exhaustiveThreshold > 1.) {
 			throw new RuntimeException("exhaustive threshold must be in [0,1]");
 		}
+		final int ix = Integer.parseInt(cmd.getOptionValue("ix"));
+		final int iy = Integer.parseInt(cmd.getOptionValue("iy"));
+		final short cx = Short.parseShort(cmd.getOptionValue("cx"));
+		final short cy = Short.parseShort(cmd.getOptionValue("cy"));
+		final byte mVal = Byte.parseByte(cmd.getOptionValue("imax"));
 		// double globalTw = FilesProcessing.getCentileAbsWeight(weightsData,
 		// 0.80);
 		final List<RealNeuron> lNeurons = new ArrayList<>();
@@ -91,7 +105,7 @@ public class BinarizeAll {
 				public void accept(final RealNeuron t) {
 					final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, deterministic);
 					final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
-							new CachedBinarization(originalNeuron, images, referenceImages));
+							new ConvBinarization(originalNeuron, cx, cy, ix, iy, mVal, images, referenceImages));
 					solutions[t.id] = paramSearch.searchBestLogLog();
 					// synchronized (System.out) {
 					// System.out.println(

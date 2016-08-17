@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 import fr.liglab.esprit.binarization.TernaryProbDistrib;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class GroundTruthNeuron implements TernaryOutputNeuron {
 	private final BitSet matchPositions;
@@ -32,6 +33,12 @@ public class GroundTruthNeuron implements TernaryOutputNeuron {
 		}
 		index++;
 		return new TernaryProbDistrib(outArray);
+	}
+
+	@Override
+	public TernaryProbDistrib getConvOutputProbs(byte[] input, int startX, int startY, int dataXSize, short convXSize,
+			short convYSize) {
+		throw new NotImplementedException();
 	}
 
 	@Override

@@ -97,17 +97,17 @@ public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 	public int getSum(byte[] input) {
 		int sum = 0;
 		for (int i = 0; i < input.length; i++) {
-			if (input[i] == 1) {
+			if (input[i] > 0) {
 				if (this.weights[i] > 0.) {
-					sum++;
+					sum += input[i];
 				} else if (this.weights[i] < 0.) {
-					sum--;
+					sum -= input[i];
 				}
-			} else if (input[i] == -1) {
+			} else if (input[i] < 0) {
 				if (this.weights[i] > 0.) {
-					sum--;
+					sum -= input[i];
 				} else if (this.weights[i] < 0.) {
-					sum++;
+					sum += input[i];
 				}
 			}
 		}
@@ -133,6 +133,47 @@ public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 		return new TernaryProbDistrib(probs);
 	}
 
+	@Override
+	public TernaryProbDistrib getConvOutputProbs(byte[] input, int startX, int startY, int dataXSize, short convXSize,
+			short convYSize) {
+		double[] probs = new double[3];
+		int sum = 0;
+		for (int i = 0; i < convXSize; i++) {
+			for (int j = 0; j < convYSize; j++) {
+				final int convPos = i * convXSize + j;
+				final int pos = (i + startX) * dataXSize + (j + startY);
+				if (input[pos] > 0) {
+					if (this.weights[convPos] > 0.) {
+						sum += input[pos];
+					} else if (this.weights[convPos] < 0.) {
+						sum -= input[pos];
+					}
+				} else if (input[pos] < 0) {
+					if (this.weights[convPos] > 0.) {
+						sum -= input[pos];
+					} else if (this.weights[convPos] < 0.) {
+						sum += input[pos];
+					}
+				}
+			}
+		}
+		if (sum > this.th) {
+			probs[0] = 0.;
+			probs[1] = 0.;
+			probs[2] = 1.;
+		} else if (sum < this.tl) {
+			probs[0] = 1.;
+			probs[1] = 0.;
+			probs[2] = 0.;
+		} else {
+			probs[0] = 0;
+			probs[1] = 1.;
+			probs[2] = 0.;
+		}
+		return new TernaryProbDistrib(probs);
+	}
+
+	@Override
 	public final double[] getWeights() {
 		return this.weights;
 	}

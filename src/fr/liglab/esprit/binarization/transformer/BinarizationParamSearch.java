@@ -3,21 +3,26 @@ package fr.liglab.esprit.binarization.transformer;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import fr.liglab.esprit.binarization.FilesProcessing;
 import fr.liglab.esprit.binarization.neuron.CachedBinarization;
+import fr.liglab.esprit.binarization.neuron.IBinarization;
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 
 public class BinarizationParamSearch {
 
-	private final CachedBinarization scoreSpace;
+	private final IBinarization scoreSpace;
 	private int nbOptionsTested = 0;
+	private final Map<IntPair, TernaryConfig> cachedResults;
 
-	public BinarizationParamSearch(CachedBinarization scoreSpace) {
+	public BinarizationParamSearch(IBinarization scoreSpace) {
 		super();
 		this.scoreSpace = scoreSpace;
+		this.cachedResults = new HashMap<>();
 	}
 
 	public TernaryConfig getActualBest() {
@@ -152,15 +157,27 @@ public class BinarizationParamSearch {
 		}
 	}
 
+	private TernaryConfig getCachedOrCompute(final int x, final int y) {
+		IntPair p = new IntPair(x, y);
+		TernaryConfig res = cachedResults.get(p);
+		if (res != null) {
+			return res;
+		} else {
+			res = this.scoreSpace.getBestConfig(x, y);
+			cachedResults.put(p, res);
+			return res;
+		}
+	}
+
 	private TernaryConfig searchBestDichotomic(int x, int fromY, int toY) {
 		// System.out.println("Y " + x + " - " + fromY + " - " + toY);
 		if (toY - fromY == 1) {
 			this.nbOptionsTested += 1;
-			return this.scoreSpace.getBestConfig(x, fromY);
+			return this.getCachedOrCompute(x, fromY);
 		} else if (toY - fromY == 2) {
 			nbOptionsTested += 2;
-			TernaryConfig first = this.scoreSpace.getBestConfig(x, fromY);
-			TernaryConfig second = this.scoreSpace.getBestConfig(x, fromY + 1);
+			TernaryConfig first = this.getCachedOrCompute(x, fromY);
+			TernaryConfig second = this.getCachedOrCompute(x, fromY + 1);
 			if (first.getScore() > second.getScore()) {
 				return first;
 			} else {
@@ -171,10 +188,10 @@ public class BinarizationParamSearch {
 			int length = toY - fromY;
 			int segment1Size = (length - 2) / 3;
 			int breakPoint1Pos = fromY + segment1Size;
-			TernaryConfig lim1Score = this.scoreSpace.getBestConfig(x, breakPoint1Pos);
+			TernaryConfig lim1Score = this.getCachedOrCompute(x, breakPoint1Pos);
 			int segment2Size = (length - segment1Size - 2) / 2;
 			int breakPoint2Pos = breakPoint1Pos + segment2Size + 1;
-			TernaryConfig lim2Score = this.scoreSpace.getBestConfig(x, breakPoint2Pos);
+			TernaryConfig lim2Score = this.getCachedOrCompute(x, breakPoint2Pos);
 			// System.out.println(lim1Score + "\t" + lim2Score);
 			if (lim1Score.getScore() > lim2Score.getScore()) {
 				return searchBestDichotomic(x, fromY, breakPoint2Pos);
@@ -191,7 +208,7 @@ public class BinarizationParamSearch {
 			for (int j = Math.max(0, y - dy / 2); j < Math.min(this.scoreSpace.getNbNegPossibilities(),
 					y + 1 + dy / 2); j++) {
 				this.nbOptionsTested++;
-				TernaryConfig pos = this.scoreSpace.getBestConfig(i, j);
+				TernaryConfig pos = this.getCachedOrCompute(i, j);
 				if (bestPos == null || pos.getScore() > bestPos.getScore()) {
 					bestPos = pos;
 				}
@@ -200,13 +217,54 @@ public class BinarizationParamSearch {
 		return bestPos;
 	}
 
+	private static class IntPair {
+		final int x;
+		final int y;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + x;
+			result = prime * result + y;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			IntPair other = (IntPair) obj;
+			if (x != other.x)
+				return false;
+			if (y != other.y)
+				return false;
+			return true;
+		}
+
+		public IntPair(int x, int y) {
+			super();
+			this.x = x;
+			this.y = y;
+		}
+
+		@Override
+		public String toString() {
+			return "IntPair [x=" + x + ", y=" + y + "]";
+		}
+	}
+
 	public static void main(String[] args) throws Exception {
 		double[] weights = FilesProcessing.getWeights("/Users/vleroy/Desktop/neuron26.txt", 0);
 		double bias = FilesProcessing.getBias("/Users/vleroy/Desktop/bias26.txt", 0);
 		TanHNeuron nOrigin = new TanHNeuron(weights, bias, false);
 		List<byte[]> input = FilesProcessing.getAllTrainingSet(
 				"/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt", Integer.MAX_VALUE);
-		CachedBinarization cb = new CachedBinarization(nOrigin, input, null);
+		IBinarization cb = new CachedBinarization(nOrigin, input, null);
 		// TernaryWeightsNeuron nBinarized = new
 		// TernaryWeightsNeuron(Arrays.copyOf(weights, weights.length),
 		// 0.030318,

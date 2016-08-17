@@ -2,14 +2,14 @@ package fr.liglab.esprit.binarization.neuron;
 
 import fr.liglab.esprit.binarization.TernaryProbDistrib;
 
-public class TanHNeuron implements TernaryOutputNeuron {
+public class HardTanHNeuron implements TernaryOutputNeuron {
 	private final double[] realWeights;
 	private final double bias;
 	private final boolean deterministic;
 	private double accumAgreement;
 	private int nbSamplesProcessed;
 
-	public TanHNeuron(double[] realWeights, double bias, boolean deterministic) {
+	public HardTanHNeuron(double[] realWeights, double bias, boolean deterministic) {
 		super();
 		this.realWeights = realWeights;
 		this.bias = bias;
@@ -29,8 +29,7 @@ public class TanHNeuron implements TernaryOutputNeuron {
 		for (int i = 0; i < input.length; i++) {
 			sum += this.realWeights[i] * input[i];
 		}
-		double out = Math.tanh(sum);
-		// output index: -1->0 0->1 1->2
+		double out = Math.min(Math.max(sum, -1), 1);
 		if (this.deterministic) {
 			this.accumAgreement += 1.0;
 			if (out > 0) {
@@ -80,8 +79,8 @@ public class TanHNeuron implements TernaryOutputNeuron {
 				sum += this.realWeights[convPos] * input[pos];
 			}
 		}
-		double out = Math.tanh(sum);
-		// output index: -1->0 0->1 1->2
+		double out = Math.min(Math.max(sum, -1), 1);
+		// output index: -1->0 0->1, 1->2
 		if (this.deterministic) {
 			this.accumAgreement += 1.0;
 			if (out > 0) {

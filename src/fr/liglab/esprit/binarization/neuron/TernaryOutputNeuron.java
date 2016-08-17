@@ -5,6 +5,9 @@ import fr.liglab.esprit.binarization.TernaryProbDistrib;
 public interface TernaryOutputNeuron {
 	public TernaryProbDistrib getOutputProbs(byte[] input);
 
+	public TernaryProbDistrib getConvOutputProbs(byte[] input, int startX, int startY, int dataXSize, short convXSize,
+			short convYSize);
+
 	public double[] getWeights();
 
 	default public double getWeightSign(int index) {
