@@ -15,8 +15,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import fr.liglab.esprit.binarization.neuron.CachedBinarization;
-import fr.liglab.esprit.binarization.neuron.ConvBinarization;
 import fr.liglab.esprit.binarization.neuron.ConvBinarizationHalfCached;
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 import fr.liglab.esprit.binarization.transformer.BinarizationParamSearch;
@@ -155,7 +153,7 @@ public class BinarizeAllConv {
 		for (RealNeuron t : neuronRerun) {
 			final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, false);
 			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
-					new ConvBinarization(originalNeuron, cx, cy, ix, iy, mVal, images, referenceImages));
+					new ConvBinarizationHalfCached(originalNeuron, cx, cy, ix, iy, mVal, images, referenceImages));
 			solutions[t.id] = paramSearch.getActualBestParallel();
 			System.out.println("neuron " + t.id + ": exhaustive search changed to "
 					+ solutions[t.id].getScore() / originalNeuron.getMaxAgreement());
