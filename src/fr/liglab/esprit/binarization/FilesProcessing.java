@@ -467,4 +467,24 @@ public class FilesProcessing {
 		// }
 		System.out.println(getNbAlwaysZero(dataFile));
 	}
+
+	public static List<float[]> getAllActivations(String file, int nbNeurons)  throws IOException{
+		List<float[]> allActivations = new ArrayList<>();
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		String line;
+
+		while ((line = br.readLine()) != null) {
+			if (allActivations.size() == nbNeurons) {
+				break;
+			}
+			String[] input = line.split(",");
+			float[] weights = new float[input.length];
+			for (int i = 0; i < input.length; i++) {
+				weights[i] = Float.parseFloat(input[i]);
+			}
+			allActivations.add(weights);
+		}
+		br.close();
+		return allActivations;
+	}
 }

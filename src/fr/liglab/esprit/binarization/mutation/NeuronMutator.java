@@ -1,16 +1,10 @@
 package fr.liglab.esprit.binarization.mutation;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import fr.liglab.esprit.binarization.FilesProcessing;
-import fr.liglab.esprit.binarization.NeuronComparator;
-import fr.liglab.esprit.binarization.ScoreFunctions;
 import fr.liglab.esprit.binarization.TernaryProbDistrib;
 import fr.liglab.esprit.binarization.neuron.SumHistogram;
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;

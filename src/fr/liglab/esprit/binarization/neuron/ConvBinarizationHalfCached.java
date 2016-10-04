@@ -20,7 +20,7 @@ public class ConvBinarizationHalfCached implements IBinarization {
 	final private int inputYSize;
 	final private short maxSum;
 	final private short minSum;
-	final private TernaryOutputNeuron originalNeuron;
+	// final private TernaryOutputNeuron originalNeuron;
 	final private int nbPosWeights;
 	final private int nbNegWeights;
 	final private int nbOccurencesOfConv;
@@ -35,7 +35,7 @@ public class ConvBinarizationHalfCached implements IBinarization {
 			final short convYSize, final int inputXSize, final int inputYSize, final byte inputMaxVal,
 			final List<byte[]> input, List<byte[]> referenceInput) {
 		this.input = input;
-		this.originalNeuron = originalNeuron;
+		// this.originalNeuron = originalNeuron;
 		this.convXSize = convXSize;
 		this.convYSize = convYSize;
 		this.inputXSize = inputXSize;
@@ -60,8 +60,8 @@ public class ConvBinarizationHalfCached implements IBinarization {
 			this.originalOutput.add(outputMat);
 			for (int x = 0; x < (this.inputXSize - this.convXSize + 1); x++) {
 				for (int y = 0; y < (this.inputYSize - this.convYSize + 1); y++) {
-					outputMat[x][y] = this.originalNeuron.getConvOutputProbs(refData, x, y, this.inputXSize,
-							this.convXSize, this.convYSize);
+					outputMat[x][y] = originalNeuron.getConvOutputProbs(refData, x, y, this.inputXSize, this.convXSize,
+							this.convYSize);
 				}
 			}
 		}

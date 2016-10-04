@@ -126,7 +126,7 @@ public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 			probs[1] = 0.;
 			probs[2] = 0.;
 		} else {
-			probs[0] = 0;
+			probs[0] = 0.;
 			probs[1] = 1.;
 			probs[2] = 0.;
 		}
@@ -166,7 +166,7 @@ public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 			probs[1] = 0.;
 			probs[2] = 0.;
 		} else {
-			probs[0] = 0;
+			probs[0] = 0.;
 			probs[1] = 1.;
 			probs[2] = 0.;
 		}

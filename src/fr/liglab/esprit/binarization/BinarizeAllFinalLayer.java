@@ -24,7 +24,7 @@ import fr.liglab.esprit.binarization.transformer.BinarizationParamSearch;
 import fr.liglab.esprit.binarization.transformer.TernaryConfig;
 
 public class BinarizeAllFinalLayer {
-	public static class RealNeuron {
+	private static class RealNeuron {
 		// private double bias;
 		private double[] weights;
 		private int id;

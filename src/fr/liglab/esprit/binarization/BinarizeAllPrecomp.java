@@ -16,14 +16,14 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import fr.liglab.esprit.binarization.neuron.CachedBinarization;
-import fr.liglab.esprit.binarization.neuron.TanHNeuron;
+import fr.liglab.esprit.binarization.neuron.PrecompNeuron;
 import fr.liglab.esprit.binarization.transformer.BinarizationParamSearch;
 import fr.liglab.esprit.binarization.transformer.TernaryConfig;
 
-public class BinarizeAll {
-	private static class RealNeuron {
-		private double bias;
+public class BinarizeAllPrecomp {
+	private static class RealNeuronPrecomp {
 		private double[] weights;
+		private float[] activations;
 		private int id;
 	}
 
@@ -39,7 +39,7 @@ public class BinarizeAll {
 		options.addOption(Option.builder("w").longOpt("weights").desc("Original weights").hasArg().argName("FILE")
 				.required().build());
 		options.addOption(
-				Option.builder("b").longOpt("bias").desc("Original bias").hasArg().argName("FILE").required().build());
+				Option.builder("a").longOpt("activations").desc("Original activations").hasArg().argName("FILE").required().build());
 		options.addOption(Option.builder("o").longOpt("output").desc("Neuron configuration output file").hasArg()
 				.argName("FILE").required().build());
 		options.addOption(Option.builder("e").longOpt("exhaustive")
@@ -58,7 +58,7 @@ public class BinarizeAll {
 		final String trainingData = cmd.getOptionValue("t");
 		final String referenceTrainingData = cmd.getOptionValue("r", null);
 		final String weightsData = cmd.getOptionValue("w");
-		final String biasData = cmd.getOptionValue("b");
+		final String activationsData = cmd.getOptionValue("a");
 		final String outputFile = cmd.getOptionValue("o");
 		final double exhaustiveThreshold = Double
 				.parseDouble(cmd.getOptionValue("e", Double.toString(DEFAULT_EXHAUSTIVE_THRESHOLD)));
@@ -68,13 +68,13 @@ public class BinarizeAll {
 		}
 		// double globalTw = FilesProcessing.getCentileAbsWeight(weightsData,
 		// 0.80);
-		final List<RealNeuron> lNeurons = new ArrayList<>();
+		final List<RealNeuronPrecomp> lNeurons = new ArrayList<>();
 		final List<double[]> allWeights = FilesProcessing.getAllWeights(weightsData, Integer.MAX_VALUE);
-		final List<Double> allBias = FilesProcessing.getAllBias(biasData, Integer.MAX_VALUE);
+		final List<float[]> allActivations = FilesProcessing.getAllActivations(activationsData, Integer.MAX_VALUE);
 		for (int i = 0; i < allWeights.size(); i++) {
-			RealNeuron rl = new RealNeuron();
+			RealNeuronPrecomp rl = new RealNeuronPrecomp();
 			rl.weights = allWeights.get(i);
-			rl.bias = allBias.get(i);
+			rl.activations = allActivations.get(i);
 			rl.id = i;
 			lNeurons.add(rl);
 		}
@@ -83,13 +83,13 @@ public class BinarizeAll {
 				? FilesProcessing.getAllTrainingSet(referenceTrainingData, Integer.MAX_VALUE) : null;
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
 		final AtomicInteger nbDone = new AtomicInteger();
-		final List<RealNeuron> neuronRerun = new ArrayList<>();
+		final List<RealNeuronPrecomp> neuronRerun = new ArrayList<>();
 		if (exhaustiveThreshold != 1.0) {
-			lNeurons.parallelStream().forEach(new Consumer<RealNeuron>() {
+			lNeurons.parallelStream().forEach(new Consumer<RealNeuronPrecomp>() {
 
 				@Override
-				public void accept(final RealNeuron t) {
-					final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, deterministic);
+				public void accept(final RealNeuronPrecomp t) {
+					final PrecompNeuron originalNeuron = new PrecompNeuron(t.weights, deterministic, t.activations);
 					final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
 							new CachedBinarization(originalNeuron, images, referenceImages));
 					solutions[t.id] = paramSearch.searchBestLogLog();
@@ -137,8 +137,8 @@ public class BinarizeAll {
 			neuronRerun.addAll(lNeurons);
 		}
 		System.out.println("doing exhaustive search for " + neuronRerun.size() + " neurons");
-		for (RealNeuron t : neuronRerun) {
-			final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, false);
+		for (RealNeuronPrecomp t : neuronRerun) {
+			final PrecompNeuron originalNeuron = new PrecompNeuron(t.weights, false, t.activations);
 			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
 					new CachedBinarization(originalNeuron, images, referenceImages));
 			solutions[t.id] = paramSearch.getActualBestParallel();

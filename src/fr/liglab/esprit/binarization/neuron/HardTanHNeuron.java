@@ -32,26 +32,26 @@ public class HardTanHNeuron implements TernaryOutputNeuron {
 		double out = Math.min(Math.max(sum, -1), 1);
 		if (this.deterministic) {
 			this.accumAgreement += 1.0;
-			if (out > 0) {
+			if (out > 0.) {
 				outArray[0] = 0.;
 				outArray[1] = 0.;
 				outArray[2] = 1.;
-			} else if (out == 0) {
+			} else if (out == 0.) {
 				outArray[0] = 0.;
 				outArray[1] = 1.;
 				outArray[2] = 0.;
 			} else {
-				outArray[0] = 1;
+				outArray[0] = 1.;
 				outArray[1] = 0.;
 				outArray[2] = 0.;
 			}
 		} else {
-			if (out > 0) {
+			if (out > 0.) {
 				outArray[0] = 0.;
 				outArray[1] = 1. - out;
 				outArray[2] = out;
 				this.accumAgreement += Math.max(outArray[1], outArray[2]);
-			} else if (out == 0) {
+			} else if (out == 0.) {
 				outArray[0] = 0.;
 				outArray[1] = 1.;
 				outArray[2] = 0.;
@@ -83,26 +83,26 @@ public class HardTanHNeuron implements TernaryOutputNeuron {
 		// output index: -1->0 0->1, 1->2
 		if (this.deterministic) {
 			this.accumAgreement += 1.0;
-			if (out > 0) {
+			if (out > 0.) {
 				outArray[0] = 0.;
 				outArray[1] = 0.;
 				outArray[2] = 1.;
-			} else if (out == 0) {
+			} else if (out == 0.) {
 				outArray[0] = 0.;
 				outArray[1] = 1.;
 				outArray[2] = 0.;
 			} else {
-				outArray[0] = 1;
+				outArray[0] = 1.;
 				outArray[1] = 0.;
 				outArray[2] = 0.;
 			}
 		} else {
-			if (out > 0) {
+			if (out > 0.) {
 				outArray[0] = 0.;
 				outArray[1] = 1. - out;
 				outArray[2] = out;
 				this.accumAgreement += Math.max(outArray[1], outArray[2]);
-			} else if (out == 0) {
+			} else if (out == 0.) {
 				outArray[0] = 0.;
 				outArray[1] = 1.;
 				outArray[2] = 0.;
