@@ -2,6 +2,7 @@ package fr.liglab.esprit.binarization;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,7 +24,7 @@ import fr.liglab.esprit.binarization.transformer.TernaryConfig;
 public class BinarizeAllPrecomp {
 	private static class RealNeuronPrecomp {
 		private double[] weights;
-		private float[] activations;
+		private String activationsFile;
 		private int id;
 	}
 
@@ -38,8 +39,8 @@ public class BinarizeAllPrecomp {
 				.argName("FILE").required(false).build());
 		options.addOption(Option.builder("w").longOpt("weights").desc("Original weights").hasArg().argName("FILE")
 				.required().build());
-		options.addOption(
-				Option.builder("a").longOpt("activations").desc("Original activations").hasArg().argName("FILE").required().build());
+		options.addOption(Option.builder("a").longOpt("activations").desc("Original activations").hasArg()
+				.argName("FILE").required().build());
 		options.addOption(Option.builder("o").longOpt("output").desc("Neuron configuration output file").hasArg()
 				.argName("FILE").required().build());
 		options.addOption(Option.builder("e").longOpt("exhaustive")
@@ -70,11 +71,10 @@ public class BinarizeAllPrecomp {
 		// 0.80);
 		final List<RealNeuronPrecomp> lNeurons = new ArrayList<>();
 		final List<double[]> allWeights = FilesProcessing.getAllWeights(weightsData, Integer.MAX_VALUE);
-		final List<float[]> allActivations = FilesProcessing.getAllActivations(activationsData, Integer.MAX_VALUE);
 		for (int i = 0; i < allWeights.size(); i++) {
 			RealNeuronPrecomp rl = new RealNeuronPrecomp();
 			rl.weights = allWeights.get(i);
-			rl.activations = allActivations.get(i);
+			rl.activationsFile = activationsData + i;
 			rl.id = i;
 			lNeurons.add(rl);
 		}
@@ -89,7 +89,14 @@ public class BinarizeAllPrecomp {
 
 				@Override
 				public void accept(final RealNeuronPrecomp t) {
-					final PrecompNeuron originalNeuron = new PrecompNeuron(t.weights, deterministic, t.activations);
+					PrecompNeuron originalNeuron = null;
+					try {
+						originalNeuron = new PrecompNeuron(t.weights, deterministic,
+								FilesProcessing.getActivations(t.activationsFile));
+					} catch (IOException e) {
+						e.printStackTrace();
+						System.exit(-1);
+					}
 					final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
 							new CachedBinarization(originalNeuron, images, referenceImages));
 					solutions[t.id] = paramSearch.searchBestLogLog();
@@ -138,7 +145,8 @@ public class BinarizeAllPrecomp {
 		}
 		System.out.println("doing exhaustive search for " + neuronRerun.size() + " neurons");
 		for (RealNeuronPrecomp t : neuronRerun) {
-			final PrecompNeuron originalNeuron = new PrecompNeuron(t.weights, false, t.activations);
+			final PrecompNeuron originalNeuron = new PrecompNeuron(t.weights, false,
+					FilesProcessing.getActivations(t.activationsFile));
 			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
 					new CachedBinarization(originalNeuron, images, referenceImages));
 			solutions[t.id] = paramSearch.getActualBestParallel();

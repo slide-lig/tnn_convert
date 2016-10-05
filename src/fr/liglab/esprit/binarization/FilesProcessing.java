@@ -468,7 +468,7 @@ public class FilesProcessing {
 		System.out.println(getNbAlwaysZero(dataFile));
 	}
 
-	public static List<float[]> getAllActivations(String file, int nbNeurons)  throws IOException{
+	public static List<float[]> getAllActivations(String file, int nbNeurons) throws IOException {
 		List<float[]> allActivations = new ArrayList<>();
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		String line;
@@ -486,5 +486,17 @@ public class FilesProcessing {
 		}
 		br.close();
 		return allActivations;
+	}
+
+	public static float[] getActivations(String file) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		String line = br.readLine();
+		br.close();
+		String[] input = line.split(",");
+		float[] weights = new float[input.length];
+		for (int i = 0; i < input.length; i++) {
+			weights[i] = Float.parseFloat(input[i]);
+		}
+		return weights;
 	}
 }
