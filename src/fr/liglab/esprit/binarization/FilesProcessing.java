@@ -508,7 +508,7 @@ public class FilesProcessing {
 	public static float[] getActivationsBinary(String file) throws IOException {
 		Path path = Paths.get(file);
 		byte[] rawBytes = Files.readAllBytes(path);
-		float[] weights = new float[rawBytes.length / 2];
+		float[] weights = new float[rawBytes.length / 4];
 		FloatBuffer fb = ByteBuffer.wrap(rawBytes).asFloatBuffer();
 		fb.get(weights);
 		return weights;
