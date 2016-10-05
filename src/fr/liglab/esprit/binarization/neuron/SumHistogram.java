@@ -2,8 +2,6 @@ package fr.liglab.esprit.binarization.neuron;
 
 import org.omg.CORBA.IntHolder;
 
-import fr.liglab.esprit.binarization.TernaryProbDistrib;
-
 public class SumHistogram {
 	private final double[] dist;
 	private final int offset;
@@ -16,16 +14,6 @@ public class SumHistogram {
 
 	public void addOccurence(int sum, double occ) {
 		this.dist[sum + offset] += occ;
-	}
-
-	public void addOccurence(int sum, TernaryProbDistrib pDist, int index) {
-		if (index == 0) {
-			this.addOccurence(sum, pDist.getPMin1());
-		} else if (index == 1) {
-			this.addOccurence(sum, pDist.getP0());
-		} else {
-			this.addOccurence(sum, pDist.getP1());
-		}
 	}
 
 	public int findCrossPoint(SumHistogram other) {

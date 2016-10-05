@@ -35,17 +35,17 @@ public class TernaryProbDistrib {
 		return "TernaryProbDistrib [pMin1=" + pMin1 + ", p0=" + p0 + ", p1=" + p1 + "]";
 	}
 
-	public final double getPMin1() {
-		return pMin1;
-	}
-
-	public final double getP0() {
-		return p0;
-	}
-
-	public final double getP1() {
-		return p1;
-	}
+//	public final double getPMin1() {
+//		return pMin1;
+//	}
+//
+//	public final double getP0() {
+//		return p0;
+//	}
+//
+//	public final double getP1() {
+//		return p1;
+//	}
 
 	public final double getProb(int index) {
 		if (index == 0) {

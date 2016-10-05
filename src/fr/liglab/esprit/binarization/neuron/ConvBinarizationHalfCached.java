@@ -209,7 +209,7 @@ public class ConvBinarizationHalfCached implements IBinarization {
 						}
 					}
 					for (int o = 0; o < 3; o++) {
-						s[o].addOccurence(outputVal, originalOut, o);
+						s[o].addOccurence(outputVal, originalOut.getProb(0));
 					}
 				}
 			}
