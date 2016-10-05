@@ -27,9 +27,12 @@ public class NeuronComparator {
 	public void update(byte[] input) {
 		TernaryProbDistrib output1 = n1.getOutputProbs(input);
 		TernaryProbDistrib output2 = n2.getOutputProbs(input);
-		for (int i = 0; i < 3; i++) {
-			this.confMat.add(output1, i, output2.getProbs()[i]);
-		}
+		this.confMat.add(output1, 0, output2.getPMin1());
+		this.confMat.add(output1, 1, output2.getP0());
+		this.confMat.add(output1, 2, output2.getP1());
+		// for (int i = 0; i < 3; i++) {
+		// this.confMat.add(output1, i, output2.getProbs()[i]);
+		// }
 	}
 
 	public final TernaryOutputNeuron getN1() {

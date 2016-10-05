@@ -44,7 +44,8 @@ public class ConvBinarization implements IBinarization {
 		if (referenceInput == null) {
 			referenceInput = input;
 		}
-		this.nbOccurencesOfConv = (this.inputXSize - this.convXSize + 1) * (this.inputYSize - this.convYSize + 1) * input.size();
+		this.nbOccurencesOfConv = (this.inputXSize - this.convXSize + 1) * (this.inputYSize - this.convYSize + 1)
+				* input.size();
 		this.referenceInput = referenceInput;
 		List<Integer> posWeightsIndex = new ArrayList<>(originalNeuron.getWeights().length);
 		List<Integer> negWeightsIndex = new ArrayList<>(originalNeuron.getWeights().length);
@@ -191,7 +192,7 @@ public class ConvBinarization implements IBinarization {
 						}
 					}
 					for (int o = 0; o < 3; o++) {
-						s[o].addOccurence(outputVal, originalOut.getProbs()[o]);
+						s[o].addOccurence(outputVal, originalOut, o);
 					}
 				}
 			}

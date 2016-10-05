@@ -1,40 +1,64 @@
 package fr.liglab.esprit.binarization;
 
-import java.util.Arrays;
-
 public class TernaryProbDistrib {
-	private final double[] probs;
+	private double pMin1 = 0.;
+	private double p0 = 0.;
+	private double p1 = 0.;
+
+	// private final double[] probs;
 
 	public TernaryProbDistrib() {
-		this.probs = new double[3];
-		Arrays.fill(this.probs, 0.);
-	}
-
-	public TernaryProbDistrib(double[] p) {
-		if (p.length != 3) {
-			throw new RuntimeException("length should be 3");
-		}
-		this.probs = p;
-	}
-
-	public void merge(double[] outputProbs) {
-		for (int i = 0; i < outputProbs.length; i++) {
-			this.probs[i] += outputProbs[i];
-		}
 	}
 
 	public void merge(TernaryProbDistrib outputProbs) {
-		for (int i = 0; i < this.probs.length; i++) {
-			this.probs[i] += outputProbs.probs[i];
-		}
+		this.pMin1 += outputProbs.pMin1;
+		this.p0 += outputProbs.p0;
+		this.p1 += outputProbs.p1;
 	}
 
-	public final double[] getProbs() {
-		return probs;
+	public TernaryProbDistrib(double pMin1, double p0, double p1) {
+		super();
+		this.pMin1 = pMin1;
+		this.p0 = p0;
+		this.p1 = p1;
+	}
+
+	public TernaryProbDistrib(double[] pArray) {
+		super();
+		this.pMin1 = pArray[0];
+		this.p0 = pArray[1];
+		this.p1 = pArray[2];
 	}
 
 	@Override
 	public String toString() {
-		return "TernaryProbDistrib [probs=" + Arrays.toString(probs) + "]";
+		return "TernaryProbDistrib [pMin1=" + pMin1 + ", p0=" + p0 + ", p1=" + p1 + "]";
 	}
+
+	public final double getPMin1() {
+		return pMin1;
+	}
+
+	public final double getP0() {
+		return p0;
+	}
+
+	public final double getP1() {
+		return p1;
+	}
+
+	public final double getProb(int index) {
+		if (index == 0) {
+			return this.pMin1;
+		} else if (index == 1) {
+			return this.p0;
+		} else {
+			return this.p1;
+		}
+	}
+
+	// public final double[] getProbs() {
+	// return probs;
+	// }
+
 }

@@ -167,7 +167,7 @@ public class NeuronMutator {
 			}
 			sum += diff;
 			for (int j = 0; j < 3; j++) {
-				s[j].addOccurence(sum, this.originalNeuronOutput[i].getProbs()[j]);
+				s[j].addOccurence(sum, this.originalNeuronOutput[i].getProb(j));
 			}
 		}
 		return s;

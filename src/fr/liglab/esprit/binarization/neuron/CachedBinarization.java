@@ -247,7 +247,7 @@ public class CachedBinarization implements IBinarization {
 		}
 		for (int i = 0; i < sums.length; i++) {
 			for (int j = 0; j < 3; j++) {
-				s[j].addOccurence(sums[i], this.originalNeuronOutput[i].getProbs()[j]);
+				s[j].addOccurence(sums[i], this.originalNeuronOutput[i], j);
 			}
 		}
 		return s;

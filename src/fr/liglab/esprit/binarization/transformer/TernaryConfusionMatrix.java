@@ -26,14 +26,14 @@ public class TernaryConfusionMatrix {
 	public void add(TernaryProbDistrib distrib, int chosenOutput) {
 		double[] line = this.matrix[chosenOutput];
 		for (int i = 0; i < line.length; i++) {
-			line[i] += distrib.getProbs()[i];
+			line[i] += distrib.getProb(i);
 		}
 	}
 
 	public void remove(TernaryProbDistrib distrib, int chosenOutput) {
 		double[] line = this.matrix[chosenOutput];
 		for (int i = 0; i < line.length; i++) {
-			line[i] -= distrib.getProbs()[i];
+			line[i] -= distrib.getProb(i);
 
 			if (line[i] < 0.) {
 				if (line[i] > -0.000000001) {
@@ -46,14 +46,14 @@ public class TernaryConfusionMatrix {
 	public void add(TernaryProbDistrib distrib, int chosenOutput, double scalling) {
 		double[] line = this.matrix[chosenOutput];
 		for (int i = 0; i < line.length; i++) {
-			line[i] += distrib.getProbs()[i] * scalling;
+			line[i] += distrib.getProb(i) * scalling;
 		}
 	}
 
 	public void remove(TernaryProbDistrib distrib, int chosenOutput, double scalling) {
 		double[] line = this.matrix[chosenOutput];
 		for (int i = 0; i < line.length; i++) {
-			line[i] -= distrib.getProbs()[i] * scalling;
+			line[i] -= distrib.getProb(i) * scalling;
 
 			if (line[i] < 0.) {
 				if (line[i] > -0.000000001) {
