@@ -5,6 +5,11 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -497,6 +502,15 @@ public class FilesProcessing {
 		for (int i = 0; i < input.length; i++) {
 			weights[i] = Float.parseFloat(input[i]);
 		}
+		return weights;
+	}
+
+	public static float[] getActivationsBinary(String file) throws IOException {
+		Path path = Paths.get(file);
+		byte[] rawBytes = Files.readAllBytes(path);
+		float[] weights = new float[rawBytes.length / 2];
+		FloatBuffer fb = ByteBuffer.wrap(rawBytes).asFloatBuffer();
+		fb.get(weights);
 		return weights;
 	}
 }

@@ -92,7 +92,7 @@ public class BinarizeAllPrecomp {
 					PrecompNeuron originalNeuron = null;
 					try {
 						originalNeuron = new PrecompNeuron(t.weights, deterministic,
-								FilesProcessing.getActivations(t.activationsFile));
+								FilesProcessing.getActivationsBinary(t.activationsFile));
 					} catch (IOException e) {
 						e.printStackTrace();
 						System.exit(-1);
@@ -146,7 +146,7 @@ public class BinarizeAllPrecomp {
 		System.out.println("doing exhaustive search for " + neuronRerun.size() + " neurons");
 		for (RealNeuronPrecomp t : neuronRerun) {
 			final PrecompNeuron originalNeuron = new PrecompNeuron(t.weights, false,
-					FilesProcessing.getActivations(t.activationsFile));
+					FilesProcessing.getActivationsBinary(t.activationsFile));
 			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
 					new CachedBinarization(originalNeuron, images, referenceImages));
 			solutions[t.id] = paramSearch.getActualBestParallel();
