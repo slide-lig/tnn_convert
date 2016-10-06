@@ -58,8 +58,8 @@ public class ConvBinarizationHalfCached implements IBinarization {
 			TernaryProbDistrib[][] outputMat = new TernaryProbDistrib[(this.inputXSize - this.convXSize
 					+ 1)][(this.inputYSize - this.convYSize + 1)];
 			this.originalOutput.add(outputMat);
-			for (int x = 0; x < (this.inputXSize - this.convXSize + 1); x++) {
-				for (int y = 0; y < (this.inputYSize - this.convYSize + 1); y++) {
+			for (int x = 0; x < outputMat.length; x++) {
+				for (int y = 0; y < outputMat[x].length; y++) {
 					outputMat[x][y] = originalNeuron.getConvOutputProbs(refData, x, y, this.inputXSize, this.convXSize,
 							this.convYSize);
 				}
@@ -184,7 +184,7 @@ public class ConvBinarizationHalfCached implements IBinarization {
 	}
 
 	private SumHistogram[] getSumDist(int nbPosWeights, int nbNegWeights) {
-		SumHistogram[] s = new SumHistogram[3];
+		final SumHistogram[] s = new SumHistogram[3];
 		for (int i = 0; i < s.length; i++) {
 			s[i] = new SumHistogram(this.minSum, this.maxSum);
 		}

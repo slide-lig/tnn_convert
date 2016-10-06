@@ -463,14 +463,16 @@ public class FilesProcessing {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String dataFile = "/Users/vleroy/workspace/esprit/mnist_binary/MNIST_32_32/dataTrain.txt";
+		String dataFile = "/Users/vleroy/Desktop/secret_binary_numbers_pi";
+		float[] numbers = getActivationsBinary(dataFile);
+		System.out.println(Arrays.toString(numbers));
 		// int[] histo = getDensity(dataFile);
 		// for (int i = 0; i < histo.length; i++) {
 		// if (histo[i] > 0) {
 		// System.out.println(i + "\t" + histo[i]);
 		// }
 		// }
-		System.out.println(getNbAlwaysZero(dataFile));
+		// System.out.println(getNbAlwaysZero(dataFile));
 	}
 
 	public static List<float[]> getAllActivations(String file, int nbNeurons) throws IOException {
