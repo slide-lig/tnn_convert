@@ -141,8 +141,8 @@ public class TernaryWeightsNeuron implements TernaryOutputNeuron {
 		for (int i = 0; i < convXSize; i++) {
 			for (int j = 0; j < convYSize; j++) {
 				for (int channel = 0; channel < nbChannels; channel++) {
-					final int convPos = j * convXSize + i + channel * dataXSize * dataYSize;
-					final int pos = (j + startY) * dataXSize + (i + startX);
+					final int convPos = j * convXSize + i + channel * convXSize * convYSize;
+					final int pos = (j + startY) * dataXSize + (i + startX) + channel * dataXSize * dataYSize;
 					if (input[pos] > 0) {
 						if (this.weights[convPos] > 0.) {
 							sum += input[pos];

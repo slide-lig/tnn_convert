@@ -6,6 +6,7 @@ import java.util.BitSet;
 import fr.liglab.esprit.binarization.TernaryProbDistrib;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+// NOT THREAD SAFE
 public class GroundTruthNeuron implements TernaryOutputNeuron {
 	private final BitSet matchPositions;
 	private int index;
