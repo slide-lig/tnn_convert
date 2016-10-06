@@ -108,7 +108,7 @@ public class ConvBinarization implements IBinarization {
 	 */
 	@Override
 	public TernaryConfig getBestConfig(int nbPosWeights, int nbNegWeights) {
-		System.out.println("getBestConfig " + nbPosWeights + " " + nbNegWeights);
+//		System.out.println("getBestConfig " + nbPosWeights + " " + nbNegWeights);
 		SumHistogram[] histo = getSumDist(nbPosWeights, nbNegWeights);
 		int bestTh = 0;
 		int bestTl = 0;

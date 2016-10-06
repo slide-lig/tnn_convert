@@ -48,22 +48,18 @@ public class ConvBinarizationHalfCached implements IBinarization {
 		this.nbOccurencesOfConv = (this.inputXSize - this.convXSize + 1) * (this.inputYSize - this.convYSize + 1)
 				* input.size();
 		this.originalOutput = new ArrayList<>(referenceInput.size());
-		for (int i = 0; i < referenceInput.size(); i++) {
-			originalOutput.add(new TernaryProbDistrib[(this.inputXSize - this.convXSize + 1)][(this.inputYSize
-					- this.convYSize + 1)]);
-		}
 		Iterator<byte[]> refDataIter = referenceInput.iterator();
 		while (refDataIter.hasNext()) {
-			byte[] refData = refDataIter.next();
-			TernaryProbDistrib[][] outputMat = new TernaryProbDistrib[(this.inputXSize - this.convXSize
+			final byte[] refData = refDataIter.next();
+			final TernaryProbDistrib[][] outputMat = new TernaryProbDistrib[(this.inputXSize - this.convXSize
 					+ 1)][(this.inputYSize - this.convYSize + 1)];
-			this.originalOutput.add(outputMat);
 			for (int x = 0; x < outputMat.length; x++) {
 				for (int y = 0; y < outputMat[x].length; y++) {
 					outputMat[x][y] = originalNeuron.getConvOutputProbs(refData, x, y, this.inputXSize, this.convXSize,
 							this.convYSize);
 				}
 			}
+			this.originalOutput.add(outputMat);
 		}
 		List<Integer> posWeightsIndex = new ArrayList<>(originalNeuron.getWeights().length);
 		List<Integer> negWeightsIndex = new ArrayList<>(originalNeuron.getWeights().length);
@@ -126,7 +122,8 @@ public class ConvBinarizationHalfCached implements IBinarization {
 	 */
 	@Override
 	public TernaryConfig getBestConfig(int nbPosWeights, int nbNegWeights) {
-		System.out.println("getBestConfig " + nbPosWeights + " " + nbNegWeights);
+		// System.out.println("getBestConfig " + nbPosWeights + " " +
+		// nbNegWeights);
 		SumHistogram[] histo = getSumDist(nbPosWeights, nbNegWeights);
 		int bestTh = 0;
 		int bestTl = 0;
