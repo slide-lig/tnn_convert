@@ -50,6 +50,7 @@ public class BinarizeAllConvPrecomp {
 		options.addOption(
 				Option.builder("ix").desc("Input horizontal size").hasArg().argName("SIZE").required().build());
 		options.addOption(Option.builder("iy").desc("input vertical size").hasArg().argName("SIZE").required().build());
+		options.addOption(Option.builder("ic").desc("input nb channels").hasArg().argName("SIZE").required().build());
 		options.addOption(
 				Option.builder("cx").desc("Convolution horizontal size").hasArg().argName("SIZE").required().build());
 		options.addOption(
@@ -77,6 +78,7 @@ public class BinarizeAllConvPrecomp {
 		}
 		final int ix = Integer.parseInt(cmd.getOptionValue("ix"));
 		final int iy = Integer.parseInt(cmd.getOptionValue("iy"));
+		final int ic = Integer.parseInt(cmd.getOptionValue("ic"));
 		final short cx = Short.parseShort(cmd.getOptionValue("cx"));
 		final short cy = Short.parseShort(cmd.getOptionValue("cy"));
 		final byte mVal = Byte.parseByte(cmd.getOptionValue("imax"));
@@ -111,7 +113,7 @@ public class BinarizeAllConvPrecomp {
 						System.exit(-1);
 					}
 					final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
-							new ConvBinarizationHalfCached(originalNeuron, cx, cy, ix, iy, mVal, images,
+							new ConvBinarizationHalfCached(originalNeuron, cx, cy, ix, iy, ic, mVal, images,
 									referenceImages));
 					solutions[t.id] = paramSearch.searchBestLogLog();
 					// synchronized (System.out) {
@@ -162,7 +164,7 @@ public class BinarizeAllConvPrecomp {
 			final PrecompNeuron originalNeuron = new PrecompNeuron(t.weights, false,
 					FilesProcessing.getActivationsBinary(t.activationsFile));
 			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
-					new ConvBinarizationHalfCached(originalNeuron, cx, cy, ix, iy, mVal, images, referenceImages));
+					new ConvBinarizationHalfCached(originalNeuron, cx, cy, ix, iy, ic, mVal, images, referenceImages));
 			solutions[t.id] = paramSearch.getActualBestParallel();
 			System.out.println("neuron " + t.id + ": exhaustive search changed to "
 					+ solutions[t.id].getScore() / originalNeuron.getMaxAgreement());

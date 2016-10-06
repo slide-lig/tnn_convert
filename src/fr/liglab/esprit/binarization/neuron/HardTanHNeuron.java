@@ -67,16 +67,18 @@ public class HardTanHNeuron implements TernaryOutputNeuron {
 	}
 
 	@Override
-	public TernaryProbDistrib getConvOutputProbs(byte[] input, int startX, int startY, int dataXSize, short convXSize,
-			short convYSize) {
+	public TernaryProbDistrib getConvOutputProbs(byte[] input, int startX, int startY, int dataXSize, int dataYSize,
+			short convXSize, short convYSize, int nbChannels) {
 		this.nbSamplesProcessed++;
 		double[] outArray = new double[3];
 		double sum = bias;
 		for (int i = 0; i < convXSize; i++) {
 			for (int j = 0; j < convYSize; j++) {
-				final int convPos = i * convXSize + j;
-				final int pos = (i + startX) * dataXSize + (j + startY);
-				sum += this.realWeights[convPos] * input[pos];
+				for (int channel = 0; channel < nbChannels; channel++) {
+					final int convPos = j * convXSize + i + channel * dataXSize * dataYSize;
+					final int pos = (j + startY) * dataXSize + (i + startX);
+					sum += this.realWeights[convPos] * input[pos];
+				}
 			}
 		}
 		double out = Math.min(Math.max(sum, -1), 1);

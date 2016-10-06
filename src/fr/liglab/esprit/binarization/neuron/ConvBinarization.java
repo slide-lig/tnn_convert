@@ -17,6 +17,7 @@ public class ConvBinarization implements IBinarization {
 	final private short convYSize;
 	final private int inputXSize;
 	final private int inputYSize;
+	final private int nbChannels;
 	final private short maxSum;
 	final private short minSum;
 	final private TernaryOutputNeuron originalNeuron;
@@ -31,14 +32,15 @@ public class ConvBinarization implements IBinarization {
 
 	// force posneg always active
 	public ConvBinarization(final TernaryOutputNeuron originalNeuron, final short convXSize, final short convYSize,
-			final int inputXSize, final int inputYSize, final byte inputMaxVal, final List<byte[]> input,
-			List<byte[]> referenceInput) {
+			final int inputXSize, final int inputYSize, final int nbChannels, final byte inputMaxVal,
+			final List<byte[]> input, List<byte[]> referenceInput) {
 		this.input = input;
 		this.originalNeuron = originalNeuron;
 		this.convXSize = convXSize;
 		this.convYSize = convYSize;
 		this.inputXSize = inputXSize;
 		this.inputYSize = inputYSize;
+		this.nbChannels = nbChannels;
 		this.maxSum = (short) (convXSize * convYSize * inputMaxVal);
 		this.minSum = (short) -this.maxSum;
 		if (referenceInput == null) {
@@ -108,7 +110,8 @@ public class ConvBinarization implements IBinarization {
 	 */
 	@Override
 	public TernaryConfig getBestConfig(int nbPosWeights, int nbNegWeights) {
-//		System.out.println("getBestConfig " + nbPosWeights + " " + nbNegWeights);
+		// System.out.println("getBestConfig " + nbPosWeights + " " +
+		// nbNegWeights);
 		SumHistogram[] histo = getSumDist(nbPosWeights, nbNegWeights);
 		int bestTh = 0;
 		int bestTl = 0;
@@ -178,16 +181,19 @@ public class ConvBinarization implements IBinarization {
 			for (int x = 0; x < (this.inputXSize - this.convXSize + 1); x++) {
 				for (int y = 0; y < (this.inputYSize - this.convYSize + 1); y++) {
 					TernaryProbDistrib originalOut = this.originalNeuron.getConvOutputProbs(refData, x, y,
-							this.inputXSize, this.convXSize, this.convYSize);
+							this.inputXSize, this.inputYSize, this.convXSize, this.convYSize, this.nbChannels);
 					int outputVal = 0;
 					for (int i = 0; i < this.convXSize; i++) {
 						for (int j = 0; j < this.convYSize; j++) {
-							final int convPos = i * this.convXSize + j;
-							final int pos = (i + x) * this.inputXSize + (j + y);
-							if (this.wIndex[convPos] > 0 && this.wIndex[convPos] <= nbPosWeights) {
-								outputVal += data[pos];
-							} else if (this.wIndex[convPos] < 0 && this.wIndex[convPos] >= -nbNegWeights) {
-								outputVal -= data[pos];
+							for (int channel = 0; channel < this.nbChannels; channel++) {
+								final int convPos = j * this.convXSize + i + channel * this.convXSize * this.convYSize;
+								final int pos = (j + y) * this.inputXSize + (i + x)
+										+ channel * this.inputXSize * this.inputYSize;
+								if (this.wIndex[convPos] > 0 && this.wIndex[convPos] <= nbPosWeights) {
+									outputVal += data[pos];
+								} else if (this.wIndex[convPos] < 0 && this.wIndex[convPos] >= -nbNegWeights) {
+									outputVal -= data[pos];
+								}
 							}
 						}
 					}

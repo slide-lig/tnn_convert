@@ -64,8 +64,8 @@ public class PrecompNeuron implements TernaryOutputNeuron {
 	}
 
 	@Override
-	public TernaryProbDistrib getConvOutputProbs(byte[] input, int startX, int startY, int dataXSize, short convXSize,
-			short convYSize) {
+	public TernaryProbDistrib getConvOutputProbs(byte[] input, int startX, int startY, int dataXSize, int dataYSize,
+			short convXSize, short convYSize, int nbChannels) {
 		return this.getOutputProbs(null);
 	}
 
