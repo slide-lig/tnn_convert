@@ -152,8 +152,10 @@ public class ConvBinarizationHalfCached implements IBinarization {
 				tpOne -= histo[2].getDist()[tl];
 			}
 		}
-		return new TernaryConfig(bestTh - histo[0].getOffset(), bestTl - histo[0].getOffset(), nbPosWeights,
-				nbNegWeights, bestAgreement / nbOccurencesOfConv);
+		TernaryConfig out = new TernaryConfig(bestTh - histo[0].getOffset(), bestTl - histo[0].getOffset(),
+				nbPosWeights, nbNegWeights, bestAgreement / nbOccurencesOfConv);
+		// System.out.println(out);
+		return out;
 	}
 
 	/*
@@ -206,7 +208,7 @@ public class ConvBinarizationHalfCached implements IBinarization {
 						}
 					}
 					for (int o = 0; o < 3; o++) {
-						s[o].addOccurence(outputVal, originalOut.getProb(0));
+						s[o].addOccurence(outputVal, originalOut.getProb(o));
 					}
 				}
 			}
