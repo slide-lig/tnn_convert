@@ -78,15 +78,23 @@ public class TanHNeuron implements TernaryOutputNeuron {
 		double[] outArray = new double[3];
 		double sum = bias;
 		for (int i = 0; i < convXSize; i++) {
-			for (int j = 0; j < convYSize; j++) {
-				for (int channel = 0; channel < nbChannels; channel++) {
-					final int convPos = j * convXSize + i + channel * convXSize * convYSize;
-					final int pos = (j + startY) * dataXSize + (i + startX) + channel * dataXSize * dataYSize;
-					sum += this.realWeights[convPos] * input[pos];
+			if (startX + i >= 0 && startX + i < dataXSize) {
+				for (int j = 0; j < convYSize; j++) {
+					if (startY + j >= 0 && startY + j < dataYSize) {
+						for (int channel = 0; channel < nbChannels; channel++) {
+//							System.out.println(sum);
+							final int convPos = j * convXSize + i + channel * convXSize * convYSize;
+							final int pos = (j + startY) * dataXSize + (i + startX) + channel * dataXSize * dataYSize;
+//							System.out.println("at " + i + "," + j + "," + channel + ": " + this.realWeights[convPos]
+//									+ " x " + input[pos]);
+							sum += this.realWeights[convPos] * input[pos];
+						}
+					}
 				}
 			}
 		}
 		double out = Math.tanh(sum);
+		// System.out.println(sum + " " + out);
 		// output index: -1->0 0->1 1->2
 		if (this.deterministic) {
 			this.accumAgreement.addAndGet(1.0);

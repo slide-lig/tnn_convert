@@ -18,12 +18,15 @@ import org.apache.commons.cli.ParseException;
 
 import fr.liglab.esprit.binarization.neuron.ConvBinarizationHalfCached;
 import fr.liglab.esprit.binarization.neuron.PrecompNeuron;
+import fr.liglab.esprit.binarization.neuron.TanHNeuron;
+import fr.liglab.esprit.binarization.neuron.ValidatePrecom;
 import fr.liglab.esprit.binarization.transformer.BinarizationParamSearch;
 import fr.liglab.esprit.binarization.transformer.TernaryConfig;
 
-public class BinarizeAllConvPrecomp {
+public class TestActivations {
 	private static class RealNeuronPrecomp {
 		private double[] weights;
+		private double bias;
 		private String activationsFile;
 		private int id;
 	}
@@ -39,6 +42,8 @@ public class BinarizeAllConvPrecomp {
 				.argName("FILE").required(false).build());
 		options.addOption(Option.builder("w").longOpt("weights").desc("Original weights").hasArg().argName("FILE")
 				.required().build());
+		options.addOption(
+				Option.builder("b").longOpt("bias").desc("Original bias").hasArg().argName("FILE").required().build());
 		options.addOption(Option.builder("a").longOpt("activations").desc("Original activations").hasArg()
 				.argName("FILE").required().build());
 		options.addOption(Option.builder("o").longOpt("output").desc("Neuron configuration output file").hasArg()
@@ -70,6 +75,7 @@ public class BinarizeAllConvPrecomp {
 		final String trainingData = cmd.getOptionValue("t");
 		final String referenceTrainingData = cmd.getOptionValue("r", null);
 		final String weightsData = cmd.getOptionValue("w");
+		final String biasData = cmd.getOptionValue("b");
 		final String activationsData = cmd.getOptionValue("a");
 		final String outputFile = cmd.getOptionValue("o");
 		final double exhaustiveThreshold = Double
@@ -89,11 +95,13 @@ public class BinarizeAllConvPrecomp {
 		// 0.80);
 		final List<RealNeuronPrecomp> lNeurons = new ArrayList<>();
 		final List<double[]> allWeights = FilesProcessing.getAllWeights(weightsData, Integer.MAX_VALUE);
+		final List<Double> allBias = FilesProcessing.getAllBias(biasData, Integer.MAX_VALUE);
 		for (int i = 0; i < allWeights.size(); i++) {
 			RealNeuronPrecomp rl = new RealNeuronPrecomp();
 			rl.weights = allWeights.get(i);
 			rl.activationsFile = activationsData + i;
 			rl.id = i;
+			rl.bias = allBias.get(i);
 			lNeurons.add(rl);
 		}
 		final List<byte[]> images = FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE);
@@ -164,13 +172,11 @@ public class BinarizeAllConvPrecomp {
 		}
 		System.out.println("doing exhaustive search for " + neuronRerun.size() + " neurons");
 		for (RealNeuronPrecomp t : neuronRerun) {
-			final PrecompNeuron originalNeuron = new PrecompNeuron(t.weights, false,
+			final PrecompNeuron precompNeuron = new PrecompNeuron(t.weights, false,
 					FilesProcessing.getActivationsBinary(t.activationsFile));
-			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(new ConvBinarizationHalfCached(
-					originalNeuron, cx, cy, ix, iy, ic, cp, mVal, images, referenceImages));
-			solutions[t.id] = paramSearch.getActualBestParallel();
-			System.out.println("neuron " + t.id + ": exhaustive search changed to "
-					+ solutions[t.id].getScore() / originalNeuron.getMaxAgreement());
+			final TanHNeuron compNeuron = new TanHNeuron(t.weights, t.bias, false);
+			ValidatePrecom b = new ValidatePrecom(precompNeuron, compNeuron, cx, cy, ix, iy, ic,cp, mVal, images,
+					referenceImages);
 		}
 
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));

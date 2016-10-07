@@ -22,12 +22,14 @@ public abstract class AConvBinarization implements IBinarization {
 	final int nbPosWeights;
 	final int nbNegWeights;
 	final int nbOccurencesOfConv;
+	final int padding;
 
 	// force posneg always active
 	public AConvBinarization(final TernaryOutputNeuron originalNeuron, final short convXSize, final short convYSize,
-			final int inputXSize, final int inputYSize, final int nbChannels, final byte inputMaxVal,
+			final int inputXSize, final int inputYSize, final int nbChannels, final int padding, final byte inputMaxVal,
 			final List<byte[]> input) {
 		this.input = input;
+		this.padding = padding;
 		// this.originalNeuron = originalNeuron;
 		this.convXSize = convXSize;
 		this.convYSize = convYSize;
@@ -36,8 +38,8 @@ public abstract class AConvBinarization implements IBinarization {
 		this.nbChannels = nbChannels;
 		this.maxSum = (short) (convXSize * convYSize * inputMaxVal * nbChannels);
 		this.minSum = (short) -this.maxSum;
-		this.nbOccurencesOfConv = (this.inputXSize - this.convXSize + 1) * (this.inputYSize - this.convYSize + 1)
-				* input.size();
+		this.nbOccurencesOfConv = (this.inputXSize - this.convXSize + 1 + this.padding * 2)
+				* (this.inputYSize - this.convYSize + 1 + this.padding * 2) * input.size();
 		List<Integer> posWeightsIndex = new ArrayList<>(originalNeuron.getWeights().length);
 		List<Integer> negWeightsIndex = new ArrayList<>(originalNeuron.getWeights().length);
 		for (int i = 0; i < originalNeuron.getWeights().length; i++) {
@@ -170,20 +172,25 @@ public abstract class AConvBinarization implements IBinarization {
 		int inputId = 0;
 		while (dataIter.hasNext()) {
 			final byte[] data = dataIter.next();
-			for (int x = 0; x < (this.inputXSize - this.convXSize + 1); x++) {
-				for (int y = 0; y < (this.inputYSize - this.convYSize + 1); y++) {
+			for (int y = -this.padding; y < (this.inputYSize - this.convYSize + 1 + this.padding); y++) {
+				for (int x = -this.padding; x < (this.inputXSize - this.convXSize + 1 + this.padding); x++) {
 					TernaryProbDistrib originalOut = this.getOriginalOutput(inputId, x, y);
 					int outputVal = 0;
 					for (int i = 0; i < this.convXSize; i++) {
-						for (int j = 0; j < this.convYSize; j++) {
-							for (int channel = 0; channel < this.nbChannels; channel++) {
-								final int convPos = j * this.convXSize + i + channel * this.convXSize * this.convYSize;
-								final int pos = (j + y) * this.inputXSize + (i + x)
-										+ channel * this.inputXSize * this.inputYSize;
-								if (this.wIndex[convPos] > 0 && this.wIndex[convPos] <= nbPosWeights) {
-									outputVal += data[pos];
-								} else if (this.wIndex[convPos] < 0 && this.wIndex[convPos] >= -nbNegWeights) {
-									outputVal -= data[pos];
+						if (x + i >= 0 && x + i < this.inputXSize) {
+							for (int j = 0; j < this.convYSize; j++) {
+								if (y + j >= 0 && y + j < this.inputYSize) {
+									for (int channel = 0; channel < this.nbChannels; channel++) {
+										final int convPos = j * this.convXSize + i
+												+ channel * this.convXSize * this.convYSize;
+										final int pos = (j + y) * this.inputXSize + (i + x)
+												+ channel * this.inputXSize * this.inputYSize;
+										if (this.wIndex[convPos] > 0 && this.wIndex[convPos] <= nbPosWeights) {
+											outputVal += data[pos];
+										} else if (this.wIndex[convPos] < 0 && this.wIndex[convPos] >= -nbNegWeights) {
+											outputVal -= data[pos];
+										}
+									}
 								}
 							}
 						}

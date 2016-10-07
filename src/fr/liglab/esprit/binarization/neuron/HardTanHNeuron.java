@@ -77,11 +77,15 @@ public class HardTanHNeuron implements TernaryOutputNeuron {
 		double[] outArray = new double[3];
 		double sum = bias;
 		for (int i = 0; i < convXSize; i++) {
-			for (int j = 0; j < convYSize; j++) {
-				for (int channel = 0; channel < nbChannels; channel++) {
-					final int convPos = j * convXSize + i + channel * convXSize * convYSize;
-					final int pos = (j + startY) * dataXSize + (i + startX) + channel * dataXSize * dataYSize;
-					sum += this.realWeights[convPos] * input[pos];
+			if (startX + i >= 0 && startX + i < dataXSize) {
+				for (int j = 0; j < convYSize; j++) {
+					if (startY + j >= 0 && startY + j < dataYSize) {
+						for (int channel = 0; channel < nbChannels; channel++) {
+							final int convPos = j * convXSize + i + channel * convXSize * convYSize;
+							final int pos = (j + startY) * dataXSize + (i + startX) + channel * dataXSize * dataYSize;
+							sum += this.realWeights[convPos] * input[pos];
+						}
+					}
 				}
 			}
 		}

@@ -15,7 +15,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import fr.liglab.esprit.binarization.neuron.ConvBinarization;
 import fr.liglab.esprit.binarization.neuron.ConvBinarizationHalfCached;
 import fr.liglab.esprit.binarization.neuron.TanHNeuron;
 import fr.liglab.esprit.binarization.transformer.BinarizationParamSearch;
@@ -55,6 +54,7 @@ public class BinarizeAllConv {
 				Option.builder("cx").desc("Convolution horizontal size").hasArg().argName("SIZE").required().build());
 		options.addOption(
 				Option.builder("cy").desc("Convolution vertical size").hasArg().argName("SIZE").required().build());
+		options.addOption(Option.builder("cp").desc("Convolution padding").hasArg().argName("SIZE").required().build());
 		options.addOption(Option.builder("imax").desc("Max val in input").hasArg().argName("VAL").required().build());
 		final CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
@@ -81,6 +81,7 @@ public class BinarizeAllConv {
 		final int ic = Integer.parseInt(cmd.getOptionValue("ic"));
 		final short cx = Short.parseShort(cmd.getOptionValue("cx"));
 		final short cy = Short.parseShort(cmd.getOptionValue("cy"));
+		final int cp = Short.parseShort(cmd.getOptionValue("cp"));
 		final byte mVal = Byte.parseByte(cmd.getOptionValue("imax"));
 		// double globalTw = FilesProcessing.getCentileAbsWeight(weightsData,
 		// 0.80);
@@ -107,7 +108,7 @@ public class BinarizeAllConv {
 				public void accept(final RealNeuron t) {
 					final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, deterministic);
 					final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
-							new ConvBinarizationHalfCached(originalNeuron, cx, cy, ix, iy, ic, mVal, images,
+							new ConvBinarizationHalfCached(originalNeuron, cx, cy, ix, iy, ic, cp, mVal, images,
 									referenceImages));
 					solutions[t.id] = paramSearch.searchBestLogLog();
 					// synchronized (System.out) {
@@ -156,8 +157,8 @@ public class BinarizeAllConv {
 		System.out.println("doing exhaustive search for " + neuronRerun.size() + " neurons");
 		for (RealNeuron t : neuronRerun) {
 			final TanHNeuron originalNeuron = new TanHNeuron(t.weights, t.bias, false);
-			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(
-					new ConvBinarization(originalNeuron, cx, cy, ix, iy, ic, mVal, images, referenceImages));
+			final BinarizationParamSearch paramSearch = new BinarizationParamSearch(new ConvBinarizationHalfCached(
+					originalNeuron, cx, cy, ix, iy, ic, cp, mVal, images, referenceImages));
 			solutions[t.id] = paramSearch.getActualBestParallel();
 			System.out.println("neuron " + t.id + ": exhaustive search changed to "
 					+ solutions[t.id].getScore() / originalNeuron.getMaxAgreement());

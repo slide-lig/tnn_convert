@@ -10,9 +10,9 @@ public class ConvBinarization extends AConvBinarization {
 
 	// force posneg always active
 	public ConvBinarization(final TernaryOutputNeuron originalNeuron, final short convXSize, final short convYSize,
-			final int inputXSize, final int inputYSize, final int nbChannels, final byte inputMaxVal,
+			final int inputXSize, final int inputYSize, final int nbChannels, final int padding,final byte inputMaxVal,
 			final List<byte[]> input, List<byte[]> referenceInput) {
-		super(originalNeuron, convXSize, convYSize, inputXSize, inputYSize, nbChannels, inputMaxVal, input);
+		super(originalNeuron, convXSize, convYSize, inputXSize, inputYSize, nbChannels, padding, inputMaxVal, input);
 		if (referenceInput == null) {
 			referenceInput = input;
 		}
