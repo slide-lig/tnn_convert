@@ -387,6 +387,19 @@ public class FilesProcessing {
 		return trainingset;
 	}
 
+	public static List<byte[]> getAllTrainingSetB(String file, int nbSamples, int sampleSize) throws IOException {
+		List<byte[]> trainingset = new ArrayList<>();
+		Path path = Paths.get(file);
+		byte[] rawBytes = Files.readAllBytes(path);
+		ByteBuffer bb = ByteBuffer.wrap(rawBytes);
+		for (int nbSamp = 0; bb.hasRemaining() && nbSamp < nbSamples; nbSamp++) {
+			byte[] input = new byte[sampleSize];
+			bb.get(input);
+			trainingset.add(input);
+		}
+		return trainingset;
+	}
+
 	// public static List<byte[]> getFilteredTrainingSet(String file, int
 	// nbSamples) throws IOException {
 	// List<byte[]> trainingset = new ArrayList<>();

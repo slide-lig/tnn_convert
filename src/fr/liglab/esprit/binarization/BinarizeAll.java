@@ -46,6 +46,10 @@ public class BinarizeAll {
 				.desc("Threshold to go exhaustive (default " + DEFAULT_EXHAUSTIVE_THRESHOLD + ")").hasArg()
 				.argName("THRESHOLD").build());
 		options.addOption(Option.builder("d").longOpt("consider original neuron deterministic").hasArg(false).build());
+		options.addOption(
+				Option.builder("ix").desc("Input horizontal size").hasArg().argName("SIZE").required().build());
+		options.addOption(Option.builder("iy").desc("input vertical size").hasArg().argName("SIZE").required().build());
+		options.addOption(Option.builder("ic").desc("input nb channels").hasArg().argName("SIZE").required().build());
 		final CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
 		try {
@@ -63,6 +67,9 @@ public class BinarizeAll {
 		final double exhaustiveThreshold = Double
 				.parseDouble(cmd.getOptionValue("e", Double.toString(DEFAULT_EXHAUSTIVE_THRESHOLD)));
 		final boolean deterministic = cmd.hasOption("d");
+		final int ix = Integer.parseInt(cmd.getOptionValue("ix"));
+		final int iy = Integer.parseInt(cmd.getOptionValue("iy"));
+		final int ic = Integer.parseInt(cmd.getOptionValue("ic"));
 		if (exhaustiveThreshold < 0. || exhaustiveThreshold > 1.) {
 			throw new RuntimeException("exhaustive threshold must be in [0,1]");
 		}
@@ -78,9 +85,9 @@ public class BinarizeAll {
 			rl.id = i;
 			lNeurons.add(rl);
 		}
-		final List<byte[]> images = FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE);
+		final List<byte[]> images = FilesProcessing.getAllTrainingSetB(trainingData, Integer.MAX_VALUE, ix * iy * ic);
 		final List<byte[]> referenceImages = (referenceTrainingData != null)
-				? FilesProcessing.getAllTrainingSet(referenceTrainingData, Integer.MAX_VALUE) : null;
+				? FilesProcessing.getAllTrainingSetB(referenceTrainingData, Integer.MAX_VALUE, ix * iy * ic) : null;
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
 		final AtomicInteger nbDone = new AtomicInteger();
 		final List<RealNeuron> neuronRerun = new ArrayList<>();

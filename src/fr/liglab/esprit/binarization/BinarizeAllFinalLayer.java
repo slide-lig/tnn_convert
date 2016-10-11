@@ -54,6 +54,10 @@ public class BinarizeAllFinalLayer {
 				.hasArg().argName("THRESHOLD").build());
 		options.addOption(Option.builder("ec").longOpt("exhaustive convergence")
 				.desc("Flag to use exhaustive search during the convergence loop instead of loglog").build());
+		options.addOption(
+				Option.builder("ix").desc("Input horizontal size").hasArg().argName("SIZE").required().build());
+		options.addOption(Option.builder("iy").desc("input vertical size").hasArg().argName("SIZE").required().build());
+		options.addOption(Option.builder("ic").desc("input nb channels").hasArg().argName("SIZE").required().build());
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
 		try {
@@ -63,6 +67,9 @@ public class BinarizeAllFinalLayer {
 			formatter.printHelp("BinarizeAllFinalLayer", options, true);
 			System.exit(-1);
 		}
+		final int ix = Integer.parseInt(cmd.getOptionValue("ix"));
+		final int iy = Integer.parseInt(cmd.getOptionValue("iy"));
+		final int ic = Integer.parseInt(cmd.getOptionValue("ic"));
 		final String trainingData = cmd.getOptionValue("t");
 		final String referenceTrainingData = cmd.getOptionValue("r", null);
 		final String weightsData = cmd.getOptionValue("w");
@@ -93,9 +100,9 @@ public class BinarizeAllFinalLayer {
 			rl.id = i;
 			lNeurons.add(rl);
 		}
-		List<byte[]> images = FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE);
+		List<byte[]> images = FilesProcessing.getAllTrainingSetB(trainingData, Integer.MAX_VALUE, ix * iy * ic);
 		final List<byte[]> referenceImages = (referenceTrainingData != null)
-				? FilesProcessing.getAllTrainingSet(referenceTrainingData, Integer.MAX_VALUE) : null;
+				? FilesProcessing.getAllTrainingSetB(referenceTrainingData, Integer.MAX_VALUE, ix * iy * ic) : null;
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
 		final CachedBinarization[] cachedResults = new CachedBinarization[lNeurons.size()];
 		AtomicInteger nbDone = new AtomicInteger();

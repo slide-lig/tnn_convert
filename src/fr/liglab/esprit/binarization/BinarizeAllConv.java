@@ -95,9 +95,9 @@ public class BinarizeAllConv {
 			rl.id = i;
 			lNeurons.add(rl);
 		}
-		final List<byte[]> images = FilesProcessing.getAllTrainingSet(trainingData, Integer.MAX_VALUE);
+		final List<byte[]> images = FilesProcessing.getAllTrainingSetB(trainingData, Integer.MAX_VALUE, ix * iy * ic);
 		final List<byte[]> referenceImages = (referenceTrainingData != null)
-				? FilesProcessing.getAllTrainingSet(referenceTrainingData, Integer.MAX_VALUE) : null;
+				? FilesProcessing.getAllTrainingSetB(referenceTrainingData, Integer.MAX_VALUE, ix * iy * ic) : null;
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
 		final AtomicInteger nbDone = new AtomicInteger();
 		final List<RealNeuron> neuronRerun = new ArrayList<>();
