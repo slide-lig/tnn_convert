@@ -187,9 +187,11 @@ public abstract class AConvBinarization implements IBinarization {
 												+ channel * this.convXSize * this.convYSize;
 										final int pos = (j + y) * this.inputXSize + (i + x)
 												+ channel * this.inputXSize * this.inputYSize;
-										if (this.wIndex[convPos] > 0 && this.wIndex[convPos] <= nbPosWeights) {
+										if (this.wIndex[convPos] > 0 && this.wIndex[convPos] != 0
+												&& this.wIndex[convPos] <= nbPosWeights) {
 											outputVal += data[pos];
-										} else if (this.wIndex[convPos] < 0 && this.wIndex[convPos] >= -nbNegWeights) {
+										} else if (this.wIndex[convPos] < 0 && this.wIndex[convPos] != 0
+												&& this.wIndex[convPos] >= -nbNegWeights) {
 											outputVal -= data[pos];
 										}
 									}
