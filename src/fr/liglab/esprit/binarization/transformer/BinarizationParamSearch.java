@@ -203,9 +203,9 @@ public class BinarizationParamSearch {
 
 	public TernaryConfig searchExhaustiveAround(final int x, final int y, final int dx, int dy) {
 		TernaryConfig bestPos = null;
-		for (int i = Math.max(0, x - dx / 2); i < Math.min(this.scoreSpace.getNbPosPossibilities(),
+		for (int i = Math.max(0, x - dx / 2); i < Math.min(this.scoreSpace.getNbPosPossibilities() + 1,
 				x + 1 + dx / 2); i++) {
-			for (int j = Math.max(0, y - dy / 2); j < Math.min(this.scoreSpace.getNbNegPossibilities(),
+			for (int j = Math.max(0, y - dy / 2); j < Math.min(this.scoreSpace.getNbNegPossibilities() + 1,
 					y + 1 + dy / 2); j++) {
 				this.nbOptionsTested++;
 				TernaryConfig pos = this.getCachedOrCompute(i, j);
