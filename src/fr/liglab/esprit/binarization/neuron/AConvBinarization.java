@@ -50,48 +50,49 @@ public abstract class AConvBinarization implements IBinarization {
 				negWeightsIndex.add(i);
 			}
 		}
-		if (posWeightsIndex.isEmpty() || negWeightsIndex.isEmpty()) {
-			throw new RuntimeException("cannot force pos/neg tw if all weights are positive or negative");
-		} else {
-			Collections.sort(posWeightsIndex, new Comparator<Integer>() {
+		// if (posWeightsIndex.isEmpty() || negWeightsIndex.isEmpty()) {
+		// throw new RuntimeException("cannot force pos/neg tw if all weights
+		// are positive or negative");
+		// } else {
+		Collections.sort(posWeightsIndex, new Comparator<Integer>() {
 
-				@Override
-				public int compare(Integer o1, Integer o2) {
-					Double d1 = originalNeuron.getWeights()[o1];
-					Double d2 = originalNeuron.getWeights()[o2];
-					int ret = d2.compareTo(d1);
-					if (ret != 0) {
-						return ret;
-					} else {
-						return o1.compareTo(o2);
-					}
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				Double d1 = originalNeuron.getWeights()[o1];
+				Double d2 = originalNeuron.getWeights()[o2];
+				int ret = d2.compareTo(d1);
+				if (ret != 0) {
+					return ret;
+				} else {
+					return o1.compareTo(o2);
 				}
-			});
-			Collections.sort(negWeightsIndex, new Comparator<Integer>() {
+			}
+		});
+		Collections.sort(negWeightsIndex, new Comparator<Integer>() {
 
-				@Override
-				public int compare(Integer o1, Integer o2) {
-					Double d1 = Math.abs(originalNeuron.getWeights()[o1]);
-					Double d2 = Math.abs(originalNeuron.getWeights()[o2]);
-					int ret = d2.compareTo(d1);
-					if (ret != 0) {
-						return ret;
-					} else {
-						return o1.compareTo(o2);
-					}
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				Double d1 = Math.abs(originalNeuron.getWeights()[o1]);
+				Double d2 = Math.abs(originalNeuron.getWeights()[o2]);
+				int ret = d2.compareTo(d1);
+				if (ret != 0) {
+					return ret;
+				} else {
+					return o1.compareTo(o2);
 				}
-			});
-			this.nbPosWeights = posWeightsIndex.size();
-			this.nbNegWeights = negWeightsIndex.size();
-			this.wIndex = new int[originalNeuron.getWeights().length];
-			Arrays.fill(this.wIndex, 0);
-			for (int i = 0; i < posWeightsIndex.size(); i++) {
-				this.wIndex[posWeightsIndex.get(i)] = i + 1;
 			}
-			for (int i = 0; i < negWeightsIndex.size(); i++) {
-				this.wIndex[negWeightsIndex.get(i)] = -(i + 1);
-			}
+		});
+		this.nbPosWeights = posWeightsIndex.size();
+		this.nbNegWeights = negWeightsIndex.size();
+		this.wIndex = new int[originalNeuron.getWeights().length];
+		Arrays.fill(this.wIndex, 0);
+		for (int i = 0; i < posWeightsIndex.size(); i++) {
+			this.wIndex[posWeightsIndex.get(i)] = i + 1;
 		}
+		for (int i = 0; i < negWeightsIndex.size(); i++) {
+			this.wIndex[negWeightsIndex.get(i)] = -(i + 1);
+		}
+		// }
 	}
 
 	/*
