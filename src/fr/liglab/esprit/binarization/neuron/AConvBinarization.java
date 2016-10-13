@@ -1,6 +1,7 @@
 package fr.liglab.esprit.binarization.neuron;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -82,7 +83,8 @@ public abstract class AConvBinarization implements IBinarization {
 			});
 			this.nbPosWeights = posWeightsIndex.size();
 			this.nbNegWeights = negWeightsIndex.size();
-			this.wIndex = new int[posWeightsIndex.size() + negWeightsIndex.size()];
+			this.wIndex = new int[originalNeuron.getWeights().length];
+			Arrays.fill(this.wIndex, 0);
 			for (int i = 0; i < posWeightsIndex.size(); i++) {
 				this.wIndex[posWeightsIndex.get(i)] = i + 1;
 			}
