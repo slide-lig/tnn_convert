@@ -91,7 +91,7 @@ public class BinarizeAllConvPrecompNoWeights {
 				? FilesProcessing.getAllTrainingSetB(referenceTrainingData, Integer.MAX_VALUE, ix * iy * ic) : null;
 		final TernaryConfig[] solutions = new TernaryConfig[lNeurons.size()];
 		final AtomicInteger nbDone = new AtomicInteger();
-			lNeurons.parallelStream().forEach(new Consumer<RealNeuronPrecomp>() {
+			lNeurons.forEach(new Consumer<RealNeuronPrecomp>() {
 
 				@Override
 				public void accept(final RealNeuronPrecomp t) {
