@@ -35,11 +35,11 @@ public class PrecompNeuron implements TernaryOutputNeuron {
 		// output index: -1->0 0->1 1->2
 		if (this.deterministic) {
 			this.accumAgreement.addAndGet(1.0);
-			if (out > 0.f) {
+			if (out > 0.5f) {
 				outArray[0] = 0.;
 				outArray[1] = 0.;
 				outArray[2] = 1.;
-			} else if (out == 0.f) {
+			} else if (out >= -0.5f) {
 				outArray[0] = 0.;
 				outArray[1] = 1.;
 				outArray[2] = 0.;
